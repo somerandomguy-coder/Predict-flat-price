@@ -24,7 +24,10 @@ Choices made without asking, so the team can overrule them.
 20. **`attrs_age_days` and `listed_age_days` are out of the model.** They were blank in 99.8% and 13.2% of fold rows, against 0% and 0.4% of final rows, so folds could not test them.
 21. **Raw last rent features are in** (`raw_prev_ratio`, `prev_m50`, `prev_gap_days`). The adoption rule was set before the Fold B test. Fold B moved from $42.51 to $40.37 (paired 95% interval -$3.45 to -$0.81), and it had already won on four earlier windows.
 22. **Predictions average 5 seeds.** This removes seed luck and is not claimed as an accuracy gain. Decision 15's $9.60 turned out to be the highest of 10 seeds (mean $3.48, and 7 of 10 favour within-building).
-23. **The foundation model blend is not in the submission.** CatBoost + TabICL + RealMLP gained $1.83 on Fold B and $1.44 on a holdout, but it was picked from 23 blends, tested without raw rent features, and needs about 40 minutes of CPU. It is the first thing to retest after the hackathon.
+23. **The foundation lane's blend was not shipped.** A later nine-member blend from `lane/zoo` replaced it, see item 26.
 24. **Fold A was read for the final model at 14:06.** The result is $40.25, 80.8% within $100, R² 0.899, bias +$3.21. Do not choose anything on it after this point.
 
-25. **The pitch uses real numbers, not the draft's $900 and $720.** A typical Pyrmont 2-bedroom in our file is $1,010 with parking and $935 without, so the space is about $75 a week. `video/make_pitch.py` re-renders in about a minute. `demo.mp4` is a scroll through `report.html`, because there is no app.
+25. **The pitch uses real numbers, not the draft's $900 and $720.** A typical Pyrmont 2-bedroom in our file is $1,010 with parking and $930 without, so the space is about $80 a week. `video/make_pitch.py` re-renders in about a minute. `demo.mp4` is a scroll through `report.html`, because there is no app.
+26. **The submission is the `lane/zoo` blend, rounded to $10.** Fold A: $38.02 raw and $40.00 rounded (82.47% within $100, R² 0.902, bias $0). The rounded file is not meaningfully lower than LightGBM's $40.25 on the rank metric; its gains are the tie-break and bias. `out/real/rents_lgbm_1406.csv` keeps the earlier file locally, and the unrounded blend is on the teammate's machine. Rounded Fold B within-$100 and R² were not logged.
+
+28. **reanimate.sh was not used.** It is a hosted, waitlisted paid app with no installable skill or API. The pitch stays on `video/make_pitch.py` with ElevenLabs, cut to under 45 seconds.

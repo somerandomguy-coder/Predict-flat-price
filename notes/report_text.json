@@ -8,7 +8,8 @@
   "Indexing each flat's own last rent to the target date. This took the Fold A anchor bias from -$50 to +$3.62.",
   "Rolling two-month training windows, so each training row faces the same gap as the real task.",
   "Rebuilding parking and bedrooms as known at each cutoff. This removed a hidden leak and created 85 Fold B adverts that test the parking premium directly.",
-  "Noticing how landlords behave. About a quarter of re-lets within two years return at exactly the old rent, which an index cannot show. Adding the raw last rent improved Fold B by about $2 and flats with history most of all, while Fold A barely moved."
+  "Noticing how landlords behave. About a quarter of re-lets within two years return at exactly the old rent, which an index cannot show. Adding the raw last rent improved Fold B by about $2 and flats with history most of all, while Fold A barely moved.",
+  "Blending. A nine-model blend reached $38.02 on Fold A before rounding, against $40.25 for LightGBM alone. Weights were chosen on earlier windows, and Fold A was read once for this blend."
  ],
  "what_didnt": [
   "Projecting the rent trend forward. Tuning on Fold B chose to hold the index flat at the cutoff.",
@@ -16,8 +17,8 @@
   "Public data. Thirteen sets of open-data features (G-NAF, OpenStreetMap, Census, cadastre, transport and amenities) gave no gain overall on Fold B. The best set helped first-time flats by perhaps $1 to $2 but cost flats with history about $1, and its first result did not repeat on fresh seeds.",
   "Microburbs API data. Extra adverts, transport, schools, amenities, risks, noise and market series all missed our bar of $1 with a clear interval on Fold B. Market series came closest, at -$0.66. Crime was left out because its inputs are undated. Sale history was only 26% pulled, so it is untested.",
   "Using the model's own parking gap. It came out around $17 to $22, compressed because anchors stay fixed between passes. We use the within-building premium, median $36. The two could not be separated on 85 Fold B adverts whose parking changed.",
-  "Bigger models. TabPFN, TabICL, TabM and RealMLP gave no reliable win over plain trees on all rows. One blend looked about $1 to $2 better, but it was picked from 23 blends, tested before our raw rent features, and too slow to ship safely, so it is not in the submission.",
-  "Model tuning. Hyperparameters, CatBoost, blends and separate models for first-time flats all stayed within noise."
+  "Model tuning. Hyperparameters, CatBoost, blends and separate models for first-time flats all stayed within noise.",
+  "Any single bigger model. TabPFN, TabICL, TabM and RealMLP gave no reliable win over plain trees on all rows. The gain came from blending many different models instead."
  ],
  "journey": [
   {
@@ -68,6 +69,23 @@
    "foldA": 40.25,
    "within100": 0.808,
    "foldB": 40.57
+  },
+  {
+   "step": "Model zoo",
+   "change": "Blend nine tree, linear, neighbour and neural models, with weights chosen only on earlier windows, and add more flat-history features.",
+   "foldA": 38.02,
+   "within100": 0.8121,
+   "foldB": 39.87
+  },
+  {
+   "step": "Round to $10",
+   "change": "Quote rents in $10 steps, the way adverts are written. The median error rose to $40, but more adverts landed within $100 and bias fell to zero. This is the submitted file.",
+   "foldA": 40.0,
+   "within100": 0.8247,
+   "foldB": 40.0
   }
+ ],
+ "limitations": [
+  "Rounding to $10 means errors fall on $10 steps, so the median can jump in steps on the real adverts. Fold B's blend weights also saw Fold B, so its $39.87 is not a clean test."
  ]
 }

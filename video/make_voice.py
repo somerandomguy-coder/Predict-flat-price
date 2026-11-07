@@ -5,11 +5,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 KEY = next(l.split("=", 1)[1].strip() for l in open(ROOT / ".env") if l.startswith("ELEVENLABS_API_KEY="))
 LINES = [
-    "No car, but still paying for parking? This two-bedroom flat in Pyrmont is about a thousand and ten dollars a week. How much of that pays for empty concrete?",
-    "Our model prices both, for every flat. About nine hundred and thirty-five dollars without the space. So that space costs about seventy-five dollars a week. Three thousand nine hundred dollars a year.",
-    "Now both sides can do better. A tenant with no car can ask for the flat without it. An owner can lease the space to someone who needs it.",
-    "Why trust the number? On two thousand six hundred later adverts it had never seen, our typical miss was about forty dollars a week, and eighty-one percent landed within a hundred dollars.",
-    "And parking isn't worth the same everywhere. About seventy dollars in Pyrmont, about twenty-six in Waterloo. Value follows scarcity.",
+    "No car, but still paying for parking? This Pyrmont two-bedroom is about a thousand and ten dollars a week. How much of that is empty concrete?",
+    "Our model prices both, for every flat. Without the space, about nine hundred and thirty. That's eighty dollars a week, over four thousand a year.",
+    "A tenant with no car can ask for the flat without it. An owner can lease the space to someone who needs it.",
+    "Tested on two thousand six hundred later adverts, our typical miss was about forty dollars a week, and eighty-two percent landed within a hundred.",
+    "And value follows scarcity. About seventy dollars in Pyrmont, about twenty-six in Waterloo.",
     "Know what you are paying for. Two Bulbs, One Source.",
 ]
 H = {"xi-api-key": KEY, "User-Agent": "predict-flat-price-pitch", "Content-Type": "application/json"}
@@ -30,6 +30,6 @@ pick = next((v for v in voices if v.get("labels", {}).get("accent") in ("austral
 print("using:", pick["name"], pick.get("labels", {}).get("accent"))
 for i, t in enumerate(LINES):
     b = call(f"https://api.elevenlabs.io/v1/text-to-speech/{pick['voice_id']}?output_format=mp3_44100_128",
-             dict(text=t, model_id="eleven_multilingual_v2", voice_settings=dict(stability=.5, similarity_boost=.75)))
+             dict(text=t, model_id="eleven_multilingual_v2", voice_settings=dict(stability=.5, similarity_boost=.75, speed=1.1)))
     (ROOT / f"video/audio/scene_{i}.mp3").write_bytes(b)
 print("clips:", len(LINES), "chars:", sum(map(len, LINES)))

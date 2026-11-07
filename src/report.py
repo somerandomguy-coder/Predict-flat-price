@@ -522,8 +522,8 @@ def sec_results(data, problems) -> str:
         rows = []
         for x in methods:
             f = fold_metrics(x, k)
-            rows.append((x.get("label") or x.get("key") or "?", count(f["n"]), money(f["mae"]), pct(f["within100"]),
-                         plain(f["r2"]), money(f["bias"], True)))
+            cells = (money(f["mae"]), pct(f["within100"]), plain(f["r2"]), money(f["bias"], True))
+            rows.append((x.get("label") or x.get("key") or "?", count(f["n"]), *["not logged" if c == PENDING else c for c in cells]))
         body += table(["Method", "Adverts", "Median error", "Within $100", "R2", "Bias"], rows, cap)
     body += '<p class="note">Bias is the median of prediction minus advert, so below zero means low.</p>'
     return section(None, "Held-out results", None, body)
@@ -537,17 +537,19 @@ def sec_list(title, data, key) -> str:
     return section(None, title, None, body)
 
 
-def sec_limits() -> str:
+def sec_limits(data=None) -> str:
+    raw = dig((data or {}).get("report_text"), "limitations")
+    extra = [text_of(i) for i in raw if text_of(i)] if isinstance(raw, list) else []
     items = ["These are asking rents from adverts, not the rent finally agreed.",
              "Flats that are advertised often are better covered than flats that rarely change hands.",
              "The parking and floor premiums are patterns in adverts. Other differences between flats may be mixed in.",
              "Estimates describe a typical flat of that kind. Renovations, views and condition are mostly invisible to the data.",
              "The test periods cover four months of 2026, so a sudden market change could behave differently.",
              "Our folds may flatter us. Flats with no earlier advert keep input fields that may come from the test advert itself, and fold adverts number about 1,300 a month against 1,699 scored over two months, so the scored adverts may be a different mix.",
-             "Fold A was not perfectly untouched. No setting was tuned on it, but the check that found the input leak looked at its adverts, and it was rerun after that fix.",
+             "Fold A was not perfectly untouched. No setting was tuned on it, but the check that found the input leak looked at its adverts, and it was read again for the final LightGBM and for the blend.",
              "We have no floor area or building age, so bigger or newer flats that have parking can inflate the premium. Treat it as an upper estimate. The two premium methods tied on median error on Fold B.",
              "Microburbs' $86 was measured on the frozen August and September adverts, not on our folds, so the comparison is indicative only."]
-    return section(None, "Limitations", None, "<ul>" + "".join(f"<li>{esc(i)}</li>" for i in items) + "</ul>")
+    return section(None, "Limitations", None, "<ul>" + "".join(f"<li>{esc(i)}</li>" for i in items + extra) + "</ul>")
 
 
 CSS = """
@@ -613,7 +615,7 @@ def render(data: dict, problems: dict, mode: str) -> str:
     parts = [intro, tiles(data), sec_journey(data, problems), sec_lag(data, problems), sec_parking(data, problems), sec_floor(data, problems),
              sec_error(data, problems), sec_shap(data, problems), sec_sources(data), sec_method(data, problems),
              sec_results(data, problems), sec_list("What worked", data, "what_worked"),
-             sec_list("What didn't", data, "what_didnt"), sec_limits()]
+             sec_list("What didn't", data, "what_didnt"), sec_limits(data)]
     foot = f"<footer>Built {esc(datetime.now(timezone.utc).strftime('%-d %b %Y %H:%M UTC'))}.</footer>"
     return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width,initial-scale=1">'

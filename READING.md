@@ -1,14 +1,14 @@
 # Where we are
 
-A plain summary for team 2 Bulbs 1 Source, updated at about 2:10 pm Sydney on Saturday 7 November 2026.
+A plain summary for team 2 Bulbs 1 Source, updated at about 3 pm Sydney on Saturday 7 November 2026.
 Build time ends at 2:45 pm.
 
 ## The short version
 
 We estimate the weekly rent of all 65,777 City of Sydney flats, with and without a car space.
 
-On adverts we held back, our typical miss is **about $40 a week**, and about **81% land within $100** (Fold A: $40.25,
-80.8%, R² 0.899, bias +$3.21). The Microburbs valuation missed by $86 on its own test. The two tests used different
+On adverts we held back, our typical miss is **about $40 a week**, and about **82% land within $100** (Fold A: $40.00,
+82.5%, R² 0.902, bias $0, for the submitted blend rounded to $10; $38.02 before rounding). The Microburbs valuation missed by $86 on its own test. The two tests used different
 adverts, so this is a strong sign, not a like-for-like win. Our real score will probably be worse than $40.
 
 A valid file is ready: `rents_2-bulbs-1-source.csv`. It is deliberately not in git.
@@ -37,6 +37,8 @@ Median error in $/week. Fold A is June and July 2026 adverts, Fold B is April an
 | 5. LightGBM model | $41.53 | $43.12 | Learned how far to trust each anchor |
 | 6. Cleaner inputs | $40.32 | $42.62 | Removed misleading fields and changed the target |
 | 7. Raw last rent | $40.25 | $40.57 | Many re-lets return at the old rent. Fold B gained about $2, Fold A barely moved |
+| 8. Model zoo | $38.02 | $39.87 | Nine-model blend, weights chosen on earlier windows. Its Fold B figure is not a clean test |
+| 9. Round to $10 | $40.00 | $40.00 | Submitted file. Median rose, but within $100 rose to 82.5% and bias fell to $0 |
 
 This is now the first section of `report.html`. New wins can be added as one more entry in `notes/report_text.json`.
 
@@ -76,7 +78,7 @@ Poisoning every row after the cutoff now moves no features.
 
 ## Parking in the file
 
-The median gap in our file is $36, close to the measured premium of about $40. It uses the within-building measure,
+The median gap in our file is $40, in line with the measured premium of about $40. It uses the within-building measure,
 picked by a rule fixed in advance. Domain research suggests the 2026 value may be nearer $45, within a range of $30 to
 $60. Barangaroo's $232 and The Rocks mostly reflect luxury flats, so don't quote those as parking values.
 
@@ -90,7 +92,7 @@ $60. Barangaroo's $232 and The Rocks mostly reflect luxury flats, so don't quote
 
 ## What the research lanes found
 
-All lanes have finished. Only the raw last rent features and seed averaging went into the model.
+All lanes have finished. The submission is the teammate's nine-model blend from `lane/zoo`, built on the raw last rent features.
 
 | Lane | Result |
 |---|---|
@@ -115,7 +117,7 @@ Fold A has now been read for the final model, so it must not be used to choose a
    with our rule against committing row-level data.
 2. **Repo visibility:** check whether it is public. `report.html` and `experiments.csv` are pushed, as aggregates only.
 3. **Report:** read `report.html`, especially the surprising finding, which is a draft. Dark mode has not been checked.
-4. **Videos:** `pitch.mp4` and `demo.mp4` are still placeholders. The script is in `PITCH_SCRIPT.filled.md`.
+4. **Videos:** `pitch.mp4` and `demo.mp4` are done. Listen to the pitch once.
 5. **Pitch wording:** don't call $40 against $86 a like-for-like win.
 
 ## Where to read more
