@@ -339,6 +339,22 @@ def compare_premium_methods(df: pd.DataFrame, premium: pd.Series, anchors=ANCHOR
     return res
 
 
+MIN_FLIPPED = 30  # fewer adverts than this cannot separate two premiums
+
+
+def pick_premium(comparison: pd.DataFrame) -> tuple[str, str]:
+    """Choose 'within_building' or 'two_pass' from compare_premium_methods output on Fold B.
+
+    Flipped adverts are the direct test, because only they score the side a flat's input does not
+    claim. With too few of them, fall back to changing only the gap on every advert (premium_mid).
+    """
+    c = comparison.set_index(["method", "segment"])
+    flipped = c.loc[("model", "flipped")]
+    seg = "flipped" if flipped["n"] >= MIN_FLIPPED else "all"
+    better = c.loc[("premium_mid", seg), "d_mae"] < 0
+    return ("within_building" if better else "two_pass"), f"Fold B premium_mid vs model on {seg} adverts"
+
+
 # ---------- report aggregates ----------
 
 def _cell(name: str, value, p: dict) -> dict:

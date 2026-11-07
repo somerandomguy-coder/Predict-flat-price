@@ -6,12 +6,49 @@ import pandas as pd
 
 from src import config as C
 from src import models as M
-from src.predict import build_panel, final_rows, load_premium_table, premium_for, write_submission
+from src import parking
+from src.predict import build_panel, final_rows, write_submission
 from src.validate import score
 
 
 def rounded(d: dict) -> dict:
     return {k: round(v, 3) if isinstance(v, float) else v for k, v in d.items() if not isinstance(v, dict)}
+
+
+def fold_prices(panel, fold, cols, winner, cfg, n):
+    """A fold's test rows, the model's two passes, and a premium table fitted only up to that fold's cutoff."""
+    cutoff = C.FOLDS[fold]["cutoff"]
+    test = M.fold_rows(panel, fold)
+    model = M.fit_model(M.train_rows(panel, cutoff, n), cols, winner, cfg)
+    passes = M.predict_two_pass(model, test)
+    return test, passes, parking.premium_for(test, parking.estimate_premium(cutoff))
+
+
+def scored(test, passes, car_premium=None):
+    prices = M.compose_prices(passes, test["input_car_space"], car_premium)
+    return score(pd.concat([test[["rent", "advert_car_space", "input_car_space"]], prices], axis=1))
+
+
+def choose_premium(panel, res, cfg, n):
+    """Stage 6: compare the within-building premium with the two-pass gap on Fold B, then report Fold A once."""
+    test, passes, table_premium = fold_prices(panel, "B", res["features"], res["winner"], cfg, n)
+    two_pass = test[["advert_car_space", "input_car_space", "rent"]].assign(
+        rent_with_car_space=passes.pred_with, rent_without_car_space=passes.pred_without)
+    comparison = parking.compare_premium_methods(two_pass, table_premium)
+    source, rule = parking.pick_premium(comparison)
+    print(comparison[comparison.method.isin(["model", "premium_mid"])][["method", "segment", "n", "mae", "d_mae", "median_gap"]].to_string(index=False))
+    print(f"premium source: {source} ({rule})")
+
+    use_table = source == "within_building"
+    fold_b = scored(test, passes, table_premium if use_table else None)
+    test_a, passes_a, table_a = fold_prices(panel, "A", res["features"], res["winner"], cfg, n)
+    fold_a = scored(test_a, passes_a, table_a if use_table else None)
+    res["folds"].update(A=fold_a, B=fold_b)
+    for m in res.get("methods", []):
+        if m["key"] == "final":
+            m["folds"].update(A=fold_a, B=fold_b)
+    res["premium_choice"] = dict(source=source, rule=rule, fold_b_comparison=comparison.to_dict("records"))
+    return source
 
 
 def main():
@@ -37,12 +74,14 @@ def main():
     print("Fold A baseline:", rounded(res["baseline_fold_a"]))
 
     panel = M.load_panel(cfg)
+    source = choose_premium(panel, res, cfg, args.n_origins)
+    print("Fold A with chosen premium:", rounded(res["folds"]["A"]))
     train = M.train_rows(panel, C.AS_OF, args.n_origins)
     model = M.fit_model(train, res["features"], res["winner"], cfg)
     X = final_rows()
     passes = M.predict_two_pass(model, X)
-    table, source = load_premium_table()
-    prices = M.compose_prices(passes, X.input_car_space, premium_for(X, table))
+    premium = parking.premium_for(X, parking.estimate_premium(C.AS_OF)) if source == "within_building" else None
+    prices = M.compose_prices(passes, X.input_car_space, premium)
     pred = pd.concat([X[["gnaf_id"]], prices], axis=1)
     # Blanks fall back to the suburb x bed x parking median, then write_submission's overall median.
     baseline = X[["gnaf_id"]].assign(rent_with_car_space=X[["base_with", "base_without"]].max(axis=1),

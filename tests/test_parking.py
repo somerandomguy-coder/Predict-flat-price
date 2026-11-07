@@ -233,3 +233,21 @@ def test_reports_match_the_shape_the_report_reads(fit, tmp_path, monkeypatch):
     assert cell | {"bedrooms"} <= set(park["by_bedrooms"][0])
     assert isinstance(floor["per_floor_premium"], float) and isinstance(floor["reference_floor"], int)
     assert cell | {"floor"} <= set(floor["curve"][0])
+
+
+def _cmp(flipped_n, flipped_d, all_d):
+    from src.parking import pick_premium
+    rows = [dict(method="model", segment="flipped", n=flipped_n, d_mae=0.0), dict(method="model", segment="all", n=999, d_mae=0.0),
+            dict(method="premium_mid", segment="flipped", n=flipped_n, d_mae=flipped_d),
+            dict(method="premium_mid", segment="all", n=999, d_mae=all_d)]
+    return pick_premium(pd.DataFrame(rows))[0]
+
+
+def test_pick_premium_trusts_flipped_adverts_when_there_are_enough():
+    assert _cmp(50, -5.0, 3.0) == "within_building"
+    assert _cmp(50, 5.0, -3.0) == "two_pass"
+
+
+def test_pick_premium_falls_back_to_all_adverts_when_flipped_is_thin():
+    assert _cmp(5, -5.0, 3.0) == "two_pass"
+    assert _cmp(5, 5.0, -3.0) == "within_building"

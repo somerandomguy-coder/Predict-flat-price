@@ -235,24 +235,6 @@ def test_ablation_methods_hold_no_fold_a(no_log):
     assert all(set(m["folds"]) == {"B"} for m in r["methods"])
 
 
-def test_premium_for_joins_by_flat_or_by_group():
-    from src.predict import premium_for
-    rows = pd.DataFrame({"gnaf_id": ["a", "b"], "suburb": ["S", "T"], "bedrooms": [1, 2]}, index=[5, 9])
-    assert premium_for(rows, None) is None
-    by_flat = premium_for(rows, pd.DataFrame({"gnaf_id": ["a"], "premium": [70.0]}))
-    assert by_flat.loc[5] == 70 and np.isnan(by_flat.loc[9])
-    by_group = premium_for(rows, pd.DataFrame({"suburb": ["T"], "bedrooms": [2], "premium": [90.0]}))
-    assert by_group.loc[9] == 90 and np.isnan(by_group.loc[5])
-    with pytest.raises(ValueError):
-        premium_for(rows, pd.DataFrame({"gnaf_id": ["a"], "value": [1]}))
-
-
-def test_premium_table_file_is_picked_up_when_present(no_log):
-    from src.predict import load_premium_table
-    assert load_premium_table() == (None, "two_pass")
-    pd.DataFrame({"gnaf_id": ["a"], "premium": [70.0]}).to_csv(no_log / "parking_premium.csv", index=False)
-    table, source = load_premium_table()
-    assert source == "parking_premium.csv" and table.premium.iloc[0] == 70
 
 
 def test_shim_switches_off_when_feature_cols_exists(monkeypatch):

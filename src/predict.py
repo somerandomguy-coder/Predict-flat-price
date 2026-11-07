@@ -1,6 +1,4 @@
 """Build the rolling-origin panel, and turn per-flat predictions into a checked submission file."""
-import importlib
-import importlib.util
 
 import pandas as pd
 
@@ -78,30 +76,3 @@ def final_rows() -> pd.DataFrame:
     car = _to_flag(flats.car_space)
     rows = flats[["gnaf_id"]].assign(target_date=C.SCORE_MID, input_car_space=car, car_space_resolved=car)
     return M.ensure_best_anchor(features.build_features(C.AS_OF, rows))
-
-
-def load_premium_table() -> tuple[pd.DataFrame | None, str]:
-    """The parking lane's table if there is one: src.parking.premium_table(), else a file under OUT_DIR.
-
-    Needs a `premium` column keyed by gnaf_id, or by any of building_key, suburb, bedrooms.
-    """
-    if importlib.util.find_spec("src.parking"):  # a broken module should fail here, not silently use two-pass
-        parking = importlib.import_module("src.parking")
-        if hasattr(parking, "premium_table"):
-            return parking.premium_table(), "src.parking.premium_table"
-    for path, read in ((C.OUT_DIR / "parking_premium.parquet", pd.read_parquet), (C.OUT_DIR / "parking_premium.csv", pd.read_csv)):
-        if path.exists():
-            return read(path), path.name
-    return None, "two_pass"
-
-
-def premium_for(rows: pd.DataFrame, table: pd.DataFrame | None) -> pd.Series | None:
-    """The table's premium for each row, NaN where it has none. None when there is no table."""
-    if table is None:
-        return None
-    keys = ["gnaf_id"] if "gnaf_id" in table.columns else [c for c in ("building_key", "suburb", "bedrooms") if c in table.columns]
-    if not keys or "premium" not in table.columns:
-        raise ValueError(f"premium table needs a key and a premium column, got {list(table.columns)}")
-    hit = rows[keys].merge(table[keys + ["premium"]], on=keys, how="left", validate="m:1")["premium"]
-    hit.index = rows.index
-    return hit
