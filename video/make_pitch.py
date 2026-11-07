@@ -96,7 +96,13 @@ def s_close(d, t):
 
 
 SCENES = [(s_problem, 8), (s_model, 9), (s_win, 9), (s_trust, 9), (s_area, 8), (s_close, 6)]
-out = ROOT / "pitch.mp4"
+clips = [ROOT / f"video/audio/scene_{i}.mp3" for i in range(len(SCENES))]
+VOICE = all(c.exists() for c in clips)
+if VOICE:  # each scene lasts as long as its narration, plus a short pause
+    length = lambda c: float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(c)]))
+    lens = [length(c) for c in clips]
+    SCENES = [(f, max(d if i == len(SCENES) - 1 else 0, l + .8)) for i, ((f, d), l) in enumerate(zip(SCENES, lens))]
+out = ROOT / "video/audio/silent.mp4" if VOICE else ROOT / "pitch.mp4"
 ff = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                        "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-shortest", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
                        "-pix_fmt", "yuv420p", "-c:a", "aac", "-movflags", "+faststart", str(out)], stdin=subprocess.PIPE)
@@ -108,4 +114,11 @@ for fn, dur in SCENES:
             im = Image.blend(im, Image.new("RGB", (W, H), BG), (t - dur + .4) / .4)
         ff.stdin.write(im.tobytes())
 ff.stdin.close(); ff.wait()
-print("wrote", out, sum(d for _, d in SCENES), "s")
+if VOICE:
+    start, ins, fl = 0.0, [], []
+    for i, (c, (_, d)) in enumerate(zip(clips, SCENES)):
+        ins += ["-i", str(c)]; fl.append(f"[{i + 1}:a]adelay={int((start + .25) * 1000)}:all=1[a{i}]"); start += d
+    mixf = ";".join(fl) + ";" + "".join(f"[a{i}]" for i in range(len(clips))) + f"amix=inputs={len(clips)}:normalize=0[a]"
+    subprocess.check_call(["ffmpeg", "-y", "-loglevel", "error", "-i", str(out), *ins, "-filter_complex", mixf, "-map", "0:v", "-map", "[a]",
+                           "-c:v", "copy", "-c:a", "aac", "-b:a", "160k", "-t", str(start), "-movflags", "+faststart", str(ROOT / "pitch.mp4")])
+print("wrote pitch.mp4", round(sum(d for _, d in SCENES), 1), "s, voice:", VOICE)
