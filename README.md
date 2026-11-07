@@ -48,3 +48,20 @@ Upload a notebook from `colab/` to Google Colab. Keep the supplied data in your 
 `src/report.py` reads aggregate JSON from `out/real/`. The expected shapes are in `INPUTS` at the top of that file. A missing input shows as pending. A real run stops if any input is not stamped real, so lanes should write `"provenance": src.report.provenance()` into each file. Hand-written text goes in `notes/report_text.json`.
 
 See `PLAN.md` for how the work is split and `DECISIONS.md` for choices made along the way.
+
+## Sources
+Used in the submitted model:
+- Microburbs supplied files: flat list, past lease adverts, and block homes and people. These are not in this repo.
+
+Tested in experiments, not in the final model (see `notes/public_data.md` and `notes/api_features.md`):
+- Microburbs API: adverts dated by 31 July 2026, transport, schools, amenities, risks, market series.
+- G-NAF, Geoscape, Open G-NAF licence.
+- ABS Census 2021 and mesh block counts, CC BY 4.0.
+- OpenStreetMap, ODbL, © OpenStreetMap contributors.
+- NSW cadastre, NSW Spatial Services, CC BY 3.0 AU.
+- City of Sydney Development Monitoring.
+
+Research sources are listed in `notes/domain_research.md`. Voice is generated with ElevenLabs.
+
+`rents_2-bulbs-1-source.csv` is the required hand-in and the only row-level file in the repo. It holds the blend from `lane/zoo`, rounded to $10.
+

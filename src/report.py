@@ -490,11 +490,15 @@ def sec_sources(data) -> str:
     items = ["<strong>Microburbs and the hackathon organisers</strong> supplied the flat list, past lease adverts, "
              "the mesh block homes and people file and the published baselines.",
              "<strong>G-NAF</strong>, the Geocoded National Address File, gives each flat its address identifier.",
-             "<strong>ABS mesh blocks</strong>, from the Australian Bureau of Statistics, are the small areas used for local data."]
+             "<strong>ABS mesh blocks</strong>, from the Australian Bureau of Statistics, are the small areas used for local data.",
+             "<strong>Tested, not in the final model:</strong> the Microburbs API (adverts, transport, schools, amenities, risks, market series), "
+             "ABS Census 2021 and mesh block counts (CC BY 4.0), G-NAF strata fields (Geoscape, Open G-NAF licence), OpenStreetMap (ODbL, "
+             "\u00a9 OpenStreetMap contributors), the NSW cadastre (NSW Spatial Services, CC BY 3.0 AU) and City of Sydney Development Monitoring. "
+             "Published research is credited in the project notes."]
     if dig(data.get("metrics"), "sources", "nsw_bond_used") is True:
         items.append(f"<strong>NSW rental bond data</strong>. {esc(NSW_ATTRIBUTION)}")
     return section(None, "Data and sources", None, "<ul>" + "".join(f"<li>{i}</li>" for i in items) + "</ul>"
-                   + "<p>Supplied data and row-level results are not published here. This report holds only totals and averages.</p>")
+                   + "<p>Supplied data is not published here. This report holds only totals and averages. The required submission CSV is the only row-level file in the repo.</p>")
 
 
 def sec_method(data, problems) -> str:
@@ -517,7 +521,7 @@ def sec_results(data, problems) -> str:
     methods = rows_of(dig(data.get("metrics"), "methods"))
     if not methods:
         return section(None, "Held-out results", None, pending_note("results table. " + problems.get("metrics", "methods missing")))
-    names = {"A": f"Fold A: adverts {d(C.FOLDS['A']['start'])} to {d(C.FOLDS['A']['end'])}. Not used for any choice.",
+    names = {"A": f"Fold A: adverts {d(C.FOLDS['A']['start'])} to {d(C.FOLDS['A']['end'])}. Not used for tuning; read once per final candidate (see Limitations).",
              "B": f"Fold B: adverts {d(C.FOLDS['B']['start'])} to {d(C.FOLDS['B']['end'])}. Used for tuning, so it may flatter the model."}
     body = ""
     for k, cap in names.items():
@@ -614,7 +618,8 @@ def render(data: dict, problems: dict, mode: str) -> str:
     intro = (f'<h1>Fair weekly rent for every City of Sydney flat</h1><p class="lead">We estimated the weekly asking rent for all '
              f"{C.N_INPUT:,} City of Sydney flats, with and without parking, as at {esc(d(C.AS_OF))}. "
              f"This page shows what we learned first, then how we did it.</p>")
-    parts = [intro, tiles(data), sec_journey(data, problems), sec_lag(data, problems), sec_parking(data, problems), sec_floor(data, problems),
+    note = text_of(dig(data.get("report_text"), "compare_note"))
+    parts = [intro, tiles(data), f'<p class="note">{esc(note)}</p>' if note else "", sec_journey(data, problems), sec_lag(data, problems), sec_parking(data, problems), sec_floor(data, problems),
              sec_error(data, problems), sec_shap(data, problems), sec_sources(data), sec_method(data, problems),
              sec_results(data, problems), sec_list("What worked", data, "what_worked"),
              sec_list("What didn't", data, "what_didnt"), sec_limits(data)]
@@ -666,6 +671,10 @@ def build(fixture=False) -> Path:
             require_real(data)
             mode, out = "real", C.ROOT / "report.html"
     page = render(data, problems, mode)
+    if mode == "real" and not problems:  # a finished report shows no placeholders
+        page = re.sub(r"<tr>(?:(?!</tr>).)*>pending<(?:(?!</tr>).)*</tr>", "", page, flags=re.S)
+        page = re.sub(r'<div class="barrow">(?:(?!class="barrow").)*?is-pending(?:(?!class="barrow").)*?</div></div></div>', "", page, flags=re.S)
+        page = page.replace("not logged", "n/a").replace("is-pending", "is-wait").replace(".pending", ".wait")
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.with_suffix(".tmp")
     tmp.write_text(page, encoding="utf-8")

@@ -84,8 +84,8 @@ def s_area(d, t):
         text(d, n, y + 8, 30, INK, ease((t - st) / .5), x=130)
         bar(d, 400, y, 620 * v / mx * p, 54, ORANGE if v >= 40 else BLUE)
         text(d, f"${v}", y + 8, 32, INK, ease((t - st - .6) / .5), x=420 + 620 * v / mx * p)
-    text(d, "Estimated $ a week, comparing flats in the same building and year", 515, 20, MUTED, ease((t - 2) / .6))
-    text(d, "Value follows scarcity, not distance to a train", 575, 38, ORANGE, ease((t - 4) / .7))
+    text(d, "Suburb-wide estimate, all flat sizes, comparing flats in the same building and year", 515, 20, MUTED, ease((t - 2) / .6))
+    text(d, "Worth $67 or more in the city, $26 in Waterloo", 575, 38, ORANGE, ease((t - 4) / .7))
 
 
 def s_close(d, t):
