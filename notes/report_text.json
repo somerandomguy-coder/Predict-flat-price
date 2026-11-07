@@ -7,14 +7,17 @@
  "what_worked": [
   "Indexing each flat's own last rent to the target date. This took the Fold A anchor bias from -$50 to +$3.62.",
   "Rolling two-month training windows, so each training row faces the same gap as the real task.",
-  "Rebuilding parking and bedrooms as known at each cutoff. This removed a hidden leak and created 85 Fold B adverts that test the parking premium directly."
+  "Rebuilding parking and bedrooms as known at each cutoff. This removed a hidden leak and created 85 Fold B adverts that test the parking premium directly.",
+  "Noticing how landlords behave. About a quarter of re-lets within two years return at exactly the old rent, which an index cannot show. Adding the raw last rent improved Fold B by about $2 and flats with history most of all, while Fold A barely moved."
  ],
  "what_didnt": [
   "Projecting the rent trend forward. Tuning on Fold B chose to hold the index flat at the cutoff.",
   "Separating the two model targets. Log(rent / anchor) beat rent by about $1 on Fold B, and the winner changed when we removed features, so treat that choice as close to noise.",
-  "Getting one clean parking number. Measured within buildings, a space is worth about $40 a week, but the submitted gap is the model's, with a median of $17, because it did better on 85 Fold B adverts whose parking changed. That sample is small, and the gap is compressed because anchors stay fixed between passes.",
   "Public data. Thirteen sets of open-data features (G-NAF, OpenStreetMap, Census, cadastre, transport and amenities) gave no gain overall on Fold B. The best set helped first-time flats by perhaps $1 to $2 but cost flats with history about $1, and its first result did not repeat on fresh seeds.",
-  "Microburbs API data. Extra adverts, transport, schools, amenities, risks, noise and market series all missed our bar of $1 with a clear interval on Fold B. Market series came closest, at -$0.66. Crime was left out because its inputs are undated. Sale history was only 26% pulled, so it is untested."
+  "Microburbs API data. Extra adverts, transport, schools, amenities, risks, noise and market series all missed our bar of $1 with a clear interval on Fold B. Market series came closest, at -$0.66. Crime was left out because its inputs are undated. Sale history was only 26% pulled, so it is untested.",
+  "Using the model's own parking gap. It came out around $17 to $22, compressed because anchors stay fixed between passes. We use the within-building premium, median $36. The two could not be separated on 85 Fold B adverts whose parking changed.",
+  "Bigger models. TabPFN, TabICL, TabM and RealMLP gave no reliable win over plain trees on all rows. One blend looked about $1 to $2 better, but it was picked from 23 blends, tested before our raw rent features, and too slow to ship safely, so it is not in the submission.",
+  "Model tuning. Hyperparameters, CatBoost, blends and separate models for first-time flats all stayed within noise."
  ],
  "journey": [
   {
@@ -58,6 +61,13 @@
    "foldA": 40.32,
    "within100": 0.803,
    "foldB": 42.62
+  },
+  {
+   "step": "Raw last rent",
+   "change": "Show the model the flat's last rent as advertised, because many re-lets return at exactly the old rent. Add 5-seed averaging. Fold B improved by about $2, Fold A barely moved.",
+   "foldA": 40.25,
+   "within100": 0.808,
+   "foldB": 40.57
   }
  ]
 }

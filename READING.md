@@ -1,15 +1,15 @@
 # Where we are
 
-A plain summary for team 2 Bulbs 1 Source, written at about 12:35 pm Sydney on Saturday 7 November 2026.
+A plain summary for team 2 Bulbs 1 Source, updated at about 2:10 pm Sydney on Saturday 7 November 2026.
 Build time ends at 2:45 pm.
 
 ## The short version
 
 We estimate the weekly rent of all 65,777 City of Sydney flats, with and without a car space.
 
-On adverts we held back, our typical miss is **about $40 a week**, and about **80% land within $100**.
-The Microburbs valuation missed by $86 on its own test. The two tests used different adverts, so this is a strong
-sign, not a like-for-like win. Our real score will probably be worse than $40.
+On adverts we held back, our typical miss is **about $40 a week**, and about **81% land within $100** (Fold A: $40.25,
+80.8%, R² 0.899, bias +$3.21). The Microburbs valuation missed by $86 on its own test. The two tests used different
+adverts, so this is a strong sign, not a like-for-like win. Our real score will probably be worse than $40.
 
 A valid file is ready: `rents_2-bulbs-1-source.csv`. It is deliberately not in git.
 
@@ -36,6 +36,7 @@ Median error in $/week. Fold A is June and July 2026 adverts, Fold B is April an
 | 4. Leak fix | $44.61 | $52.10 | Fold A got slightly worse, and the result became believable |
 | 5. LightGBM model | $41.53 | $43.12 | Learned how far to trust each anchor |
 | 6. Cleaner inputs | $40.32 | $42.62 | Removed misleading fields and changed the target |
+| 7. Raw last rent | $40.25 | $40.57 | Many re-lets return at the old rent. Fold B gained about $2, Fold A barely moved |
 
 This is now the first section of `report.html`. New wins can be added as one more entry in `notes/report_text.json`.
 
@@ -73,34 +74,33 @@ Poisoning every row after the cutoff now moves no features.
 - Fold A has been run several times and its adverts were used in the leak check. Nothing was tuned on it, but it is
   no longer pristine.
 
-## The awkward bit: parking
+## Parking in the file
 
-The measured premium is about $40, but the gap in our file has a median of about $17. The rule picks the model's gap
-because it won by $9.60 on 85 adverts where parking changed. That is a small sample, and the model's gap is squeezed
-because anchors stay fixed between the two prices. So say "$40" as a finding, not as what our CSV shows. The method
-lane is testing a fix.
+The median gap in our file is $36, close to the measured premium of about $40. It uses the within-building measure,
+picked by a rule fixed in advance. Domain research suggests the 2026 value may be nearer $45, within a range of $30 to
+$60. Barangaroo's $232 and The Rocks mostly reflect luxury flats, so don't quote those as parking values.
 
 ## Where the error is
 
-- Flats with an earlier advert miss by about $40.
-- First-time flats miss by about $56. They are the biggest opportunity.
+- Flats with an earlier advert miss by about $36 on Fold B.
+- First-time flats miss by about $58 on Fold B. They are the biggest opportunity.
 - Rents older than 5 years still run about $51 low after the index.
 - Parking and floor premiums may be too high, because we have no floor area or building age. Bigger, newer flats tend
   to have parking.
 
-## What is running now
+## What the research lanes found
 
-Results are not in yet, and all of these work on Fold B only.
+All lanes have finished. Only the raw last rent features and seed averaging went into the model.
 
-| Lane | Question | Finish by |
-|---|---|---|
-| Public data | Can open data fill floor, parking and block blanks, or add floor area and building age? | 1:30 pm |
-| API features | Are there extra adverts dated by 31 July? Do transport, schools, noise and risk help? | 1:30 pm |
-| Methods | What is the noise floor? Do tuning, ensembles or CatBoost help? Can the parking gap be fixed? | 1:30 pm |
-| Domain research | What drives flat rents and parking value, area by area? | 1:40 pm |
-| Foundation models | Do TabPFN and similar models beat LightGBM, CatBoost and XGBoost? | 1:40 pm |
+| Lane | Result |
+|---|---|
+| Domain research | Found the raw last rent idea, the only clear gain. Parking value follows scarcity, not station distance |
+| Methods | Tuning, CatBoost and blends stayed within noise. Added 5-seed averaging to remove seed luck |
+| Public data | 13 open-data feature sets gave no overall gain |
+| API features | Nothing passed the bar. Sale history is only 26% pulled and untested |
+| Foundation models | No single model reliably beat trees. One blend looked $1 to $2 better on older features, but it was picked from 23 and is too slow to ship safely |
 
-Only changes that clearly beat the noise get merged. Gaps under about $1 do not count. Fold A gets read once at the end.
+Fold A has now been read for the final model, so it must not be used to choose anything else.
 
 ## Rules we keep
 
@@ -117,7 +117,6 @@ Only changes that clearly beat the noise get merged. Gaps under about $1 do not 
 3. **Report:** read `report.html`, especially the surprising finding, which is a draft. Dark mode has not been checked.
 4. **Videos:** `pitch.mp4` and `demo.mp4` are still placeholders. The script is in `PITCH_SCRIPT.filled.md`.
 5. **Pitch wording:** don't call $40 against $86 a like-for-like win.
-6. **Colab, optional:** `colab/eda.ipynb` is ready. Steps are in `colab/README.md`.
 
 ## Where to read more
 
@@ -128,3 +127,6 @@ Only changes that clearly beat the noise get merged. Gaps under about $1 do not 
 | `DECISIONS.md` | Each choice made, and why |
 | `PLAN.md` | How the work is split |
 | `experiments.csv` | Every logged run |
+| `notes/domain_research.md` | Rents, parking by suburb, and pitch lines |
+| `notes/method_comparison.md`, `notes/foundation_models.md` | Model comparisons and noise |
+| `notes/public_data.md`, `notes/api_features.md` | What outside data did and did not add |

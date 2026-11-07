@@ -6,8 +6,8 @@ Run history is in `experiments.csv`; choices and reasons are in `DECISIONS.md`.
 ## Current result
 | | Median error | Within $100 | R² | Bias |
 |---|---|---|---|---|
-| Fold A (Jun-Jul 2026) | $40.32 | 80.3% | 0.899 | +$3.44 |
-| Fold B (Apr-May 2026) | $42.62 | 81.0% | 0.879 | +$6.56 |
+| Fold A (Jun-Jul 2026) | $40.25 | 80.8% | 0.899 | +$3.21 |
+| Fold B (Apr-May 2026) | $40.57 | 81.9% | 0.881 | +$2.13 |
 
 Expect the real score to be worse than this. See "Why folds may flatter us".
 
@@ -23,11 +23,12 @@ Expect the real score to be worse than this. See "Why folds may flatter us".
 | Block anchor alone | $67.78 | $65.93 | |
 | LightGBM on rent, all features | $41.69 | $43.12 | Before removing skewed features |
 | LightGBM on rent, date ages removed | not scored | $43.63 | |
-| **LightGBM on log(rent / anchor), date ages removed** | **$40.32** | **$42.62** | **Current** |
+| LightGBM on log(rent / anchor), date ages removed | $40.32 | $42.62 | Before raw rent |
+| **Add raw last rent features, average 5 seeds** | **$40.25** | **$40.57** | **Current. Fold B gain about $2, Fold A barely moved** |
 
 Tried and rejected: forward trend projection (Fold B chose flat), within-building premium as the submitted gap (lost by rule, see below).
 
-**Not tried:** hyperparameter tuning (fixed 400 rounds, one parameter set), other model families, seed or model ensembles, separate models for first-time flats, any API or external data, sample weighting by recency, `was_leased` handling.
+Later lanes tested tuning, other model families, ensembles, separate first-time models, API data and public data. See `notes/method_comparison.md`, `notes/foundation_models.md`, `notes/api_features.md` and `notes/public_data.md`. Direct `was_leased` handling is still untested.
 
 ## Leakage audit
 Two different questions. Results are in `out/real/leak_audit.json` and from `local/leak_audit.py`.
@@ -111,3 +112,6 @@ No open data set improved Fold B overall, so none is in the submission. Floor bl
 
 ## API result (`notes/api_features.md`)
 Nothing from the API is in the model. These tests ran against the model before raw last rent features. The profile endpoint has no floor area or year built. Sale history is the best untested idea for first-time flats: 15,808 of 60,552 flats are pulled, and `local/pull_api.py sales` resumes it. Do not test it until coverage matches between fold and final rows.
+
+## Foundation models (`notes/foundation_models.md`)
+No single model reliably beat trees. One blend looked $1 to $2 better on old features, and is the first post-hackathon retest. Holding the index flat beat Chronos forecasts.

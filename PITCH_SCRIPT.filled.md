@@ -10,7 +10,7 @@ We estimated weekly rent for all 65,777 City of Sydney flats, with and without p
 
 Old rents mislead. Copying them ran $50 a week low, because rents kept moving. Our rent index cut that gap to $4.
 
-On adverts we held back, our typical miss was $40 a week, and 80% landed within $100. Microburbs' own figure is $86.
+On adverts we held back, our typical miss was $40 a week, and 81% landed within $100. Microburbs' own figure is $86.
 
 A car space adds about $40 a week. Each floor up adds about $3.91.
 
