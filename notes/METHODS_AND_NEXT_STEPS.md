@@ -108,3 +108,6 @@ These were measured on earlier windows, not Fold B, and need confirming there af
 
 ## Public data result (`notes/public_data.md`)
 No open data set improved Fold B overall, so none is in the submission. Floor blanks cannot be filled from G-NAF, because the supplied field already comes from it. All block blanks can be filled, with no gain. The best untried lead for floor area is NSW Property Sales, which blocks automated downloads and needs a person with a browser.
+
+## API result (`notes/api_features.md`)
+Nothing from the API is in the model. These tests ran against the model before raw last rent features. The profile endpoint has no floor area or year built. Sale history is the best untested idea for first-time flats: 15,808 of 60,552 flats are pulled, and `local/pull_api.py sales` resumes it. Do not test it until coverage matches between fold and final rows.
