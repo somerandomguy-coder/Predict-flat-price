@@ -116,3 +116,16 @@ d9a4ac8b,2026-11-07T02:18:01+00:00,Method lane: f_r800 (B within100 0.8148; inne
 3bb6a17f,2026-11-07T02:18:17+00:00,Method lane: s5_lgbm_cb_half (B within100 0.8153; inner mean MAE 43.82 within100 0.7915),FEATURE_COLS,blend:lgbm_5seed+catboost_2seed,nan,nan,nan,42.79,nan
 b63ea50a,2026-11-07T02:18:17+00:00,Method lane: f_route_first_direct (B within100 0.8148; inner mean MAE 43.75 within100 0.7922),FEATURE_COLS,lgbm_l1:route:first_time=direct:else=log_ratio:seeds=5,nan,nan,nan,42.1,nan
 97d848e1,2026-11-07T02:40:57+00:00,"Manual try: {'drop': [], 'leaves': 63, 'rounds': 400, 'seeds': 5, 'method': 'log_ratio'}",FEATURE_COLS:36 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,40.37,nan
+2907de3e,2026-11-07T02:10:22+00:00,"API Fold B ablation base, mean of 5 seeds; first-time $58.58",explicit:33 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,42.98,nan
+c0f555a3,2026-11-07T02:10:22+00:00,"API Fold B ablation hist_input, mean of 5 seeds; first-time $58.41",explicit:33 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,42.79,nan
+9692dc7e,2026-11-07T02:10:22+00:00,"API Fold B ablation hist_building, mean of 5 seeds; first-time $59.13",explicit:33 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,42.95,nan
+b7fc9c03,2026-11-07T02:10:22+00:00,"API Fold B ablation file_none, mean of 3 seeds; first-time $58.48",explicit:33 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,42.61,nan
+d94de1b1,2026-11-07T02:10:22+00:00,"API Fold B ablation file_all_geo, mean of 3 seeds; first-time $57.61",explicit:64 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,43.39,nan
+b664402a,2026-11-07T02:10:22+00:00,"API Fold B ablation file_market, mean of 3 seeds; first-time $58.52",explicit:37 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,41.84,nan
+1bb560ff,2026-11-07T02:10:22+00:00,"API Fold B ablation file_crime, mean of 3 seeds; first-time $59.23",explicit:34 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,43.39,nan
+1c17d2d6,2026-11-07T02:10:22+00:00,"API Fold B ablation file_transport, mean of 3 seeds; first-time $58.55",explicit:38 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,43.34,nan
+481e0bb3,2026-11-07T02:10:22+00:00,"API Fold B ablation file_amenities, mean of 3 seeds; first-time $58.88",explicit:40 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,43.43,nan
+0eaefc9d,2026-11-07T02:10:22+00:00,"API Fold B ablation file_schools, mean of 3 seeds; first-time $57.38",explicit:38 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,42.54,nan
+d7213f7a,2026-11-07T02:10:22+00:00,"API Fold B ablation file_risks, mean of 3 seeds; first-time $58.70",explicit:40 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,43.43,nan
+fb32728b,2026-11-07T02:10:22+00:00,"API Fold B ablation file_roads_noise, mean of 3 seeds; first-time $57.95",explicit:37 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,42.67,nan
+91d2817b,2026-11-07T02:10:22+00:00,"API Fold B ablation file_planning, mean of 3 seeds; first-time $57.49",explicit:36 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,42.59,nan
