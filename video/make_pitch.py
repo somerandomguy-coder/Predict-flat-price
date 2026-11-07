@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[1]
 m = json.load(open(ROOT / "out/real/metrics.json"))["folds"]["A"]
 VALUES = dict(flats="65,777", with_=1010, without=930, miss=round(m["mae"]), within=round(m["within100"] * 100),
-              areas=[("Surry Hills", 85), ("Sydney CBD", 78), ("Pyrmont", 67), ("Waterloo", 26)])  # one method: same year, same building
+              areas=[("Pyrmont", 70), ("Sydney CBD", 69), ("Surry Hills", 49), ("Waterloo", 4)])  # the report's section 2 table
 V = VALUES
 gap = V["with_"] - V["without"]
 W, H, FPS = 1280, 720, 24
@@ -84,8 +84,8 @@ def s_area(d, t):
         text(d, n, y + 8, 30, INK, ease((t - st) / .5), x=130)
         bar(d, 400, y, 620 * v / mx * p, 54, ORANGE if v >= 40 else BLUE)
         text(d, f"${v}", y + 8, 32, INK, ease((t - st - .6) / .5), x=420 + 620 * v / mx * p)
-    text(d, "Suburb-wide estimate, all flat sizes, comparing flats in the same building and year", 515, 20, MUTED, ease((t - 2) / .6))
-    text(d, "Worth $67 or more in the city, $26 in Waterloo", 575, 38, ORANGE, ease((t - 4) / .7))
+    text(d, "Estimated $ a week, from section 2 of our report. All flat sizes, within-building comparisons.", 515, 20, MUTED, ease((t - 2) / .6))
+    text(d, "About $70 in Pyrmont, about $4 in Waterloo", 575, 38, ORANGE, ease((t - 4) / .7))
 
 
 def s_close(d, t):
