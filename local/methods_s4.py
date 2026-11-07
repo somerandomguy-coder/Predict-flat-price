@@ -31,11 +31,11 @@ def main():
     params = eval(sys.argv[1]) if len(sys.argv) > 1 else {}
     rounds = int(sys.argv[2]) if len(sys.argv) > 2 else 400
     panel = L.load_panel()
-    runs = [(f"s4_n{n}", n, None) for n in (4, 6, 8, 10, 12, 15, 18, 21, 24)]
-    runs += [(f"s4_n{n}_hl{h}", n, half_life(h)) for n, h in ((12, 12), (12, 24), (18, 12), (18, 24), (24, 12), (24, 24))]
-    runs += [(f"s4_n24_prebreak{w}", 24, pre_break(w)) for w in (0.25, 0.5)]
+    runs = [(f"s4_n{n}", n, None) for n in (6, 8, 18, 24)]
+    runs += [(f"s4_n{n}_hl{h}", n, half_life(h)) for n, h in ((12, 12), (12, 24), (24, 12), (24, 24))]
+    runs += [(f"s4_n24_prebreak{w}", 24, pre_break(w)) for w in (0.25,)]
     for name, n, weight in runs:
-        rows = L.run_lgb(panel, name, params=params, rounds=rounds, seeds=L.SEEDS, n=n, weight_fn=weight)
+        rows = L.run_lgb(panel, name, params=params, rounds=rounds, seeds=L.SEEDS[:3], n=n, weight_fn=weight)
         L.append_results("step4", rows)
 
 

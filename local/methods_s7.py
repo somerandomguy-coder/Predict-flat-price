@@ -58,13 +58,15 @@ def check_rebuild(panel) -> None:
     print("rebuild check passed", flush=True)
 
 
-def passes(tr, te, te_with, te_without, cols, method, params, rounds, seeds):
+def fit_all(tr, cols, params, rounds, seeds):
+    cfg = dict(lgb_params={**params, "num_threads": L.THREADS}, num_boost_round=rounds)
+    return [L.M.fit_model(tr, cols, "log_ratio", {**cfg, "seed": s}) for s in seeds]
+
+
+def passes(models, te_with, te_without):
     """Two passes where each test pass may carry its own anchors."""
-    w, wo = [], []
-    for s in seeds:
-        w.append(L.lgb_fit(tr, te_with, cols, method, params, rounds, s)[rounds][0])
-        wo.append(L.lgb_fit(tr, te_without, cols, method, params, rounds, s)[rounds][1])
-    return np.mean(w, axis=0), np.mean(wo, axis=0)
+    return (np.mean([m.predict(te_with, car_space=1) for m in models], axis=0),
+            np.mean([m.predict(te_without, car_space=0) for m in models], axis=0))
 
 
 def flipped_mask(te):
@@ -76,7 +78,7 @@ def main():
     params = eval(sys.argv[1]) if len(sys.argv) > 1 else {}
     rounds = int(sys.argv[2]) if len(sys.argv) > 2 else 400
     tag = sys.argv[3] if len(sys.argv) > 3 else "current"
-    seeds = L.SEEDS
+    seeds = L.SEEDS[:3]
     panel = L.load_panel()
     cols = L.columns(panel)
     check_rebuild(panel)
@@ -89,11 +91,8 @@ def main():
         te1, te0 = rebuild(te, np.ones(len(te))), rebuild(te, np.zeros(len(te)))
         tr_adv = rebuild(tr, tr.car_space_resolved.gt(0).astype(float).where(tr.car_space_resolved.notna()).to_numpy(float))
         print(w, "anchors rebuilt, within-building median", round(float(wb.median()), 2), flush=True)
-        two = {
-            "fixed": passes(tr, te, te, te, cols, "log_ratio", params, rounds, seeds),
-            "test_only": passes(tr, te, te1, te0, cols, "log_ratio", params, rounds, seeds),
-            "train_test": passes(tr_adv, te, te1, te0, cols, "log_ratio", params, rounds, seeds),
-        }
+        models, models_adv = fit_all(tr, cols, params, rounds, seeds), fit_all(tr_adv, cols, params, rounds, seeds)
+        two = {"fixed": passes(models, te, te), "test_only": passes(models, te1, te0), "train_test": passes(models_adv, te1, te0)}
         for name, (pw, pwo) in two.items():
             model_gap = pd.Series(pw - pwo, index=te.index).clip(lower=0)
             for a in (1.0, 0.75, 0.5, 0.25, 0.0):

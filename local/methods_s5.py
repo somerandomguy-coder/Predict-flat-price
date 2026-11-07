@@ -16,11 +16,10 @@ from local import methods_lib as L
 from src import models as M
 
 CB_CONFIGS = {
-    "cb_d6": dict(depth=6, learning_rate=0.05, iterations=1500),
-    "cb_d8": dict(depth=8, learning_rate=0.05, iterations=1500),
+    "cb_d6": dict(depth=6, learning_rate=0.05, iterations=1000),
 }
-CB_CHECKS = (500, 1000, 1500)
-CB_SEEDS = (7, 11, 23)
+CB_CHECKS = (500, 1000)
+CB_SEEDS = (7, 11)
 
 
 def cb_matrix(df, cols):

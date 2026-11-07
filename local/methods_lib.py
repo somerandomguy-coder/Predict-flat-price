@@ -4,6 +4,7 @@ Scoring goes through the same path as src.models.evaluate: two passes, compose_p
 Inner windows are the three two-month windows before Fold B, each trained only on origins before its own cutoff.
 """
 import json
+import os
 import time
 from pathlib import Path
 
@@ -20,7 +21,7 @@ B_CUTOFF = C.FOLDS["B"]["cutoff"]
 WINDOWS = {"B": B_CUTOFF, "I1": pd.Timestamp("2026-01-31"), "I2": pd.Timestamp("2025-11-30"), "I3": pd.Timestamp("2025-09-30")}
 INNER = ("I1", "I2", "I3")
 SEEDS = (7, 11, 23, 42, 101)
-THREADS = 3
+THREADS = int(os.environ.get("METHODS_THREADS", 3))
 BASE = {**M.LGB_PARAMS, "num_threads": THREADS}
 OUT = C.OUT_DIR / "methods"
 OUT.mkdir(parents=True, exist_ok=True)

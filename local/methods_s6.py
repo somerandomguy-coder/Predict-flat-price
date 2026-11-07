@@ -11,7 +11,7 @@ import pandas as pd
 
 from local import methods_lib as L
 
-SEEDS = L.SEEDS
+SEEDS = L.SEEDS[:3]
 
 
 def ensemble(tr, te, cols, method, params, rounds, weight=None):
