@@ -147,3 +147,5 @@ a0b8eb38,2026-11-07T02:50:44+00:00,"Foundation lane Fold B: xgb log_ratio n2000 
 a110da12,2026-11-07T02:50:44+00:00,"Foundation lane Fold B: lgb+cat blend mix  (3 seeds, mean)",FEATURE_COLS:33 cols,fm:lgb+cat:blend:mix,nan,nan,nan,42.13,nan
 86272046,2026-11-07T02:50:44+00:00,"Foundation lane Fold B: cat+tabicl5k+realmlp blend mix  (3 seeds, mean)",FEATURE_COLS:33 cols,fm:cat+tabicl5k+realmlp:blend:mix,nan,nan,nan,41.17,nan
 1ac0ee7b,2026-11-07T03:06:05+00:00,"Stage 5/7 LightGBM L1, 12 rolling origins, method picked on Fold B",FEATURE_COLS:36 cols,lgbm_l1:log_ratio:origins=12,40.25,0.808,0.8991,40.37,3.21
+8673ac9d,2026-11-07T03:01:20+00:00,"Zoo blend, greedy weights fitted on six windows and Fold B, raw","raw last rent and v2 history features, 9 members",zoo:greedy,38.02,0.8121,0.902,39.87,3.61
+69d195ed,2026-11-07T03:01:20+00:00,"Zoo blend, greedy weights fitted on six windows and Fold B, rounded to $10","raw last rent and v2 history features, 9 members",zoo:greedy,40.0,0.8247,0.902,40.0,0.0
