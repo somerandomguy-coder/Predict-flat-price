@@ -47,6 +47,16 @@ To try it on mock data first, copy the three CSVs from `data/mock/` into `flats_
 
 Re-export and re-upload the parquet files whenever `src/features.py` changes.
 
+## Foundation models
+
+`foundation_models.ipynb` runs TabPFN v2, TabICLv2, TabM, RealMLP and the tree references at full size on a GPU. Results and what to look for are in `notes/foundation_models.md`.
+
+1. Upload `out/real/features_foldB.parquet` to `flats_private`. It holds Fold B rows only, and this notebook reads no other file.
+2. Upload `colab/foundation_models.ipynb` to Colab, and choose a GPU runtime.
+3. Run all. It writes `foundation_results.csv` and `foundation_blend.csv` to `flats_private`. These hold scores only, with no row-level data.
+
+Inference stays inside the Colab runtime. Never add `tabpfn-client` or another hosted model API, because they upload rows.
+
 ### Using src/models.py
 
 The notebook has its own LightGBM L1 experiment. Once `src/models.py` lands:
