@@ -16,9 +16,9 @@ from local import methods_lib as L
 from src import models as M
 
 CB_CONFIGS = {
-    "cb_d6": dict(depth=6, learning_rate=0.05, iterations=1000),
+    "cb_d6": dict(depth=6, learning_rate=0.1, iterations=600),
 }
-CB_CHECKS = (500, 1000)
+CB_CHECKS = (300, 600)
 CB_SEEDS = (7, 11)
 
 
@@ -90,7 +90,8 @@ def run_linear(panel):
     for w in L.WINDOWS:
         tr, te = L.split(panel, w)
         car = tr.car_space_resolved.fillna(tr.car_space_resolved.mean()).gt(0) * 1.0
-        ok = tr.rent.notna()
+        ok = pd.Series(False, index=tr.index)  # a fixed sample: the exact solver takes minutes on all rows, and 13 coefficients do not need them
+        ok.iloc[np.random.default_rng(7).choice(len(tr), min(8000, len(tr)), replace=False)] = True
         reg = QuantileRegressor(quantile=0.5, alpha=0.0, solver="highs").fit(lin_design(tr[ok], car[ok], None), np.log(tr.rent[ok].to_numpy(float)))
         print("linear", w, dict(zip(lin_design(tr.head(2), [0, 0], None).columns, reg.coef_.round(3))), round(time.time() - started), flush=True)
         avg[w] = tuple(np.exp(reg.predict(lin_design(te, np.full(len(te), c), None))) for c in (1.0, 0.0))
@@ -104,8 +105,8 @@ def run_linear(panel):
 
 def main():
     panel = L.load_panel()
-    run_linear(panel)
     run_catboost(panel, L.columns(panel))
+    run_linear(panel)
 
 
 if __name__ == "__main__":
