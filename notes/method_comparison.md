@@ -7,7 +7,7 @@ Real data, Fold B and earlier windows only. "Error" is median absolute error in 
 
 | | Fold B error | Fold B within $100 | Inner error | Inner within $100 |
 |---|---|---|---|---|
-| Published model (seed 7) | $42.62 | 81.0% | not comparable | |
+| Published model (seed 7) | $42.62 | 81.0% | $44.09 | |
 | Same model, mean of 10 single seeds | $43.05 | 81.3% | $44.03 | |
 | **Recommended: same model, 5-seed average** | **$42.51** | **81.4%** | **$43.97** | **79.2%** |
 
@@ -62,12 +62,12 @@ Gaps are paired against the same-seed reference; negative is better. Rows at 5 s
 | 6 | Stretch away from anchor, 1.05 | 3 | $41.97 | 81.3% | $44.52 | | | Split |
 | 6 | First-time flats to the direct model | 5 | $42.10 | 81.5% | $43.75 | -$0.41 [-1.30, +0.43] | -$0.13 [-0.53, +0.17] | Under $1, keep simple |
 
-Complete rows for all 67 configs are in `experiments.csv` (Fold A columns blank) and `out/real/methods/`.
+All 67 result rows, one per config and round count, are in `experiments.csv` (Fold A columns blank) and `out/real/methods/`.
 
 **What the steps show:**
 - **Seeds and blends:** averaging helps by removing luck. Blending direct adds nothing measurable.
 - **Tuning:** the surface is flat. No setting wins on both Fold B and inner by more than noise, so tuning is not where the error is.
-- **History length:** Fold B prefers more history and inner windows prefer less, and pooled they cancel. Choosing on Fold B alone would have picked 18 origins, which is $0.60 worse on inner. Fewer than 12 origins also costs 1 to 1.5 points of within $100 on Fold B.
+- **History length:** Fold B prefers more history and inner windows prefer less, and pooled they cancel. Choosing on Fold B alone would have picked 18 origins, which is $0.60 worse on inner. Fewer than 12 origins also costs 1 to 1.6 points of within $100 on Fold B.
 - **Rows before 2023:** they do not help, whether full weight or down-weighted. Adverts per window jump from 628 to 1,847 at the 2023 break.
 - **Shrinkage:** it moves Fold B and inner in opposite directions, like history length.
 
