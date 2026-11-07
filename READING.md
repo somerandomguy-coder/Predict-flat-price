@@ -11,7 +11,7 @@ On adverts we held back, our typical miss is **about $40 a week**, and about **8
 82.5%, R² 0.902, bias $0, for the submitted blend rounded to $10; $38.02 before rounding). The Microburbs valuation missed by $86 on its own test. The two tests used different
 adverts, so this is a strong sign, not a like-for-like win. Our real score will probably be worse than $40.
 
-A valid file is ready: `rents_2-bulbs-1-source.csv`. It is deliberately not in git.
+A valid file is ready: `submission/rents_2-bulbs-1-source.csv`. It is deliberately not in git.
 
 ## How it works
 

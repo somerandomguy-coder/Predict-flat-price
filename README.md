@@ -1,5 +1,7 @@
 # Predict flat rents
 
+**Submission file:** [`submission/rents_2-bulbs-1-source.csv`](submission/rents_2-bulbs-1-source.csv). **Report:** [`report.html`](report.html).
+
 For a plain summary of where the project stands, read [READING.md](READING.md).
 
 We estimate the weekly asking rent for all 65,777 City of Sydney flats, with and without parking, as at 31 July 2026.
@@ -63,5 +65,5 @@ Tested in experiments, not in the final model (see `notes/public_data.md` and `n
 
 Research sources are listed in `notes/domain_research.md`. Voice is generated with ElevenLabs.
 
-`rents_2-bulbs-1-source.csv` is the required hand-in and the only row-level file in the repo. It holds the blend from `lane/zoo`, rounded to $10.
+`submission/rents_2-bulbs-1-source.csv` is the required hand-in and the only row-level file in the repo. It holds the blend from `lane/zoo`, rounded to $10.
 
