@@ -89,7 +89,8 @@ def use_history(scope: str | None) -> None:
 
 # ---- Static geography: one row per building, from one representative flat ----
 
-LIGHT_RAIL = re.compile(r"light rail|moore park|surry hills|glebe railway tunnel", re.I)
+# Named light rail stops, plus the unnamed "Train station" points, which all lie along the Inner West and George St lines.
+LIGHT_RAIL = re.compile(r"light rail|moore park|surry hills|glebe railway tunnel|bridge street|chalmers|chinatown|haymarket|qvb|kingsford|^train station$", re.I)
 ROAD_GROUPS = dict(road_major_m=("motorway", "trunk", "primary"), road_any_m=None)
 GEO_COLS = ["train_m", "light_rail_m", "bus_m", "ferry_m", "bus_stops_2km", "supermarket_m", "green_m", "restaurant_m",
             "supermarkets_1km", "green_1km", "restaurants_1km", "restaurants_300m", "school_m", "public_primary_m",

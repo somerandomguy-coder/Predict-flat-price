@@ -3,7 +3,7 @@ import sys
 from collections import Counter
 
 from src import api
-from src.load import load_input
+from src.load import load_input, load_leases
 
 PAGE = 1000
 
@@ -50,9 +50,15 @@ def pull_static() -> None:
 
 
 def pull_sales() -> None:
+    """Flats with adverts in the panel's window go first: they decide the Fold B result. Final rows need the rest."""
     f = load_input()
-    ids = f[f.suburb.isin(covered_suburbs())].gnaf_id.astype(str).tolist()
-    report("sale-history", api.get_many([(f"properties/{g}/sale-history", {}) for g in ids], progress_every=5000))
+    f = f[f.suburb.isin(covered_suburbs())]
+    L = load_leases()
+    busy = set(L[L.lease_date >= "2024-01-01"].gnaf_id.dropna().astype(str))
+    ids = f.gnaf_id.astype(str).tolist()
+    ids = [g for g in ids if g in busy] + [g for g in ids if g not in busy]
+    print("flats", len(ids), "with panel adverts", sum(g in busy for g in ids), flush=True)
+    report("sale-history", api.get_many([(f"properties/{g}/sale-history", {}) for g in ids], workers=2, progress_every=5000))
 
 
 if __name__ == "__main__":

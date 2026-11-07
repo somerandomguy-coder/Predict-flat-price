@@ -19,6 +19,7 @@ from src.validate import log_experiment, scored_prediction
 OUT = C.OUT_DIR / "api"
 SEEDS = (7, 11, 23, 42, 101)
 BOOT = 2000
+THREADS = dict(num_threads=2)  # the machine ran out of memory with jobs side by side: one job, two threads
 
 
 def panel(scope: str | None) -> pd.DataFrame:
@@ -39,7 +40,7 @@ def base_cols(p: pd.DataFrame) -> list:
 
 def _fold_b_errors(p: pd.DataFrame, cols: list, seed: int) -> pd.Series:
     """Absolute errors on Fold B rows, by row label, for the group splits and paired tests."""
-    model = M.fit_model(M.train_rows(p, C.FOLDS["B"]["cutoff"], M.N_ORIGINS), cols, "log_ratio", dict(seed=seed))
+    model = M.fit_model(M.train_rows(p, C.FOLDS["B"]["cutoff"], M.N_ORIGINS), cols, "log_ratio", dict(seed=seed, lgb_params=THREADS))
     test = M.fold_rows(p, "B")
     prices = M.compose_prices(M.predict_two_pass(model, test), test["input_car_space"])
     s = scored_prediction(pd.concat([test[["rent", "advert_car_space", "input_car_space"]], prices], axis=1))
@@ -51,7 +52,7 @@ def run(name: str, p: pd.DataFrame, cols: list, first_time: pd.Series, seeds=SEE
     overall, first, repeat, preds = [], [], [], []
     for seed in seeds:
         r = M.run_experiment(dict(frame=p, name=f"api_{name}_s{seed}", methods=["log_ratio"], feature_cols=cols, seed=seed,
-                                  log=False, description=name, out_path=OUT / "runs" / f"{name}_s{seed}.json"))
+                                  lgb_params=THREADS, log=False, description=name, out_path=OUT / "runs" / f"{name}_s{seed}.json"))
         assert not r["fold_a_reported"] and "A" not in r["folds"]
         err, pred = _fold_b_errors(p, cols, seed)
         assert abs(err.median() - r["folds"]["B"]["mae"]) < 1e-9, "group scores do not reproduce run_experiment"
@@ -69,9 +70,10 @@ def run(name: str, p: pd.DataFrame, cols: list, first_time: pd.Series, seeds=SEE
 
 def paired(rent: pd.Series, a: pd.Series, b: pd.Series, mask=None, seed=0) -> dict:
     """Bootstrap of median(|b|) - median(|a|) over adverts, on seed-averaged predictions. Negative means b is better."""
-    ea, eb = (a - rent).abs().to_numpy(), (b - rent).abs().to_numpy()
+    both = a.index.intersection(b.index)  # API history can make one more advert's parking known
     if mask is not None:
-        ea, eb = ea[mask], eb[mask]
+        both = both[mask.reindex(both).to_numpy()]
+    ea, eb = (a[both] - rent[both]).abs().to_numpy(), (b[both] - rent[both]).abs().to_numpy()
     rng = np.random.default_rng(seed)
     i = rng.integers(0, len(ea), (BOOT, len(ea)))
     d = np.median(eb[i], axis=1) - np.median(ea[i], axis=1)
@@ -103,11 +105,14 @@ def history_test() -> None:
         r, preds[scope] = run(f"hist_{scope}", p, cols, ft)
         results.append(r)
     show(results)
-    rent = base.rent.reindex(preds["base"].index)
-    m = ft.reindex(preds["base"].index).to_numpy()
-    for scope in ("input", "building"):
-        print(scope, "paired overall", paired(rent, preds["base"], preds[scope]), "first-time", paired(rent, preds["base"], preds[scope], m), flush=True)
     (OUT / "history.json").write_text(json.dumps(results, indent=1))
+    for scope in ("input", "building"):
+        print(scope, "paired overall", paired(base.rent, preds["base"], preds[scope]), "first-time", paired(base.rent, preds["base"], preds[scope], ft), flush=True)
+        e0, e1 = (preds["base"] - base.rent).abs(), (preds[scope] - base.rent).abs()
+        print(scope, "largest base errors", e0.nlargest(5).round().tolist(), "same rows now", e1.reindex(e0.nlargest(5).index).round().tolist(), flush=True)
+        t, b = M.fold_rows(panel(scope), "B"), M.fold_rows(base, "B")
+        print(scope, "median anchor_bldg_n", b.anchor_bldg_n.median(), t.anchor_bldg_n.median(), "mean", b.anchor_bldg_n.mean().round(2), t.anchor_bldg_n.mean().round(2),
+              "rows with own anchor", int(b.anchor_own.notna().sum()), int(t.anchor_own.notna().sum()), flush=True)
 
 
 GROUPS = dict(
@@ -141,29 +146,46 @@ def feature_test(sales: bool = False, history: str | None = None) -> None:
     all_geo = [c for g in GROUPS.values() for c in g]
     new = all_geo + ["crime_rate"] + AF.MARKET_COLS + (AF.SALE_COLS if sales else [])
     print(blank_rates(p, new).to_string(), flush=True)
-    variants = {"none": []} | {k: v for k, v in GROUPS.items()} | {"all_geo": all_geo, "crime": ["crime_rate"], "market": AF.MARKET_COLS}
+    # Most decision-relevant first, and saved after each, so a run cut short shows exactly what finished.
+    variants = {"none": [], "all_geo": all_geo, "market": AF.MARKET_COLS, "crime": ["crime_rate"]} | GROUPS
     if sales:
-        variants |= {"sales": AF.SALE_COLS, "geo_sales": all_geo + AF.SALE_COLS}
+        variants = {"none": [], "sales": AF.SALE_COLS, "geo_sales": all_geo + AF.SALE_COLS}
+    path = OUT / f"features_{history or 'file'}_{'sales' if sales else 'nosales'}.json"
     results, preds = [], {}
     for name, extra in variants.items():
-        r, preds[name] = run(f"{history or 'file'}_{name}", p, cols + extra, ft)
-        results.append(r)
-        show(results[-1:])
-    show(results)
-    idx = preds["none"].index
-    rent, m = p.rent.reindex(idx), ft.reindex(idx).to_numpy()
-    for name in variants:
+        r, preds[name] = run(f"{history or 'file'}_{name}", p, cols + extra, ft, seeds=SEEDS[:3])
         if name != "none":
-            print(name, "overall", paired(rent, preds["none"], preds[name]), "first-time", paired(rent, preds["none"], preds[name], m), flush=True)
-    (OUT / f"features_{history or 'file'}_{'sales' if sales else 'nosales'}.json").write_text(json.dumps(results, indent=1))
+            r |= dict(paired_overall=paired(p.rent, preds["none"], preds[name]), paired_first=paired(p.rent, preds["none"], preds[name], ft))
+        results.append(r | dict(complete=True))
+        path.write_text(json.dumps(results, indent=1))
+        print(json.dumps(results[-1]), flush=True)
+    print("ALL VARIANTS DONE", flush=True)
 
 
 def geo_test() -> None:
     feature_test()
 
 
-def sales_test() -> None:
-    feature_test(sales=True)
+def leads_test() -> None:
+    """All five seeds for the control and the two leads from geo_test. They were picked after seeing Fold B, so this is
+    a check on seed noise, not a fresh test."""
+    base = panel(None)
+    ft = base.anchor_own.isna().loc[M.fold_rows(base, "B").index]
+    p = with_api(base, False)
+    cols = base_cols(base)
+    results, preds = [], {}
+    for name, extra in {"none": [], "market": AF.MARKET_COLS, "schools": GROUPS["schools"]}.items():
+        r, preds[name] = run(f"lead_{name}", p, cols + extra, ft)
+        if name != "none":
+            r |= dict(paired_overall=paired(p.rent, preds["none"], preds[name]), paired_first=paired(p.rent, preds["none"], preds[name], ft))
+        results.append(r | dict(complete=True))
+        (OUT / "leads.json").write_text(json.dumps(results, indent=1))
+        print(json.dumps(results[-1]), flush=True)
+    print("ALL VARIANTS DONE", flush=True)
+
+
+# There is deliberately no sales test yet. The sale pull is partial, so coverage would differ between fold rows and
+# final rows, the skew already removed once (DECISIONS 20). Add one only when check_api_cache shows sale-history complete.
 
 
 if __name__ == "__main__":
