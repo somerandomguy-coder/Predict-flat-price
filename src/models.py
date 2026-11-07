@@ -24,6 +24,7 @@ from .validate import log_experiment, score
 
 STEP_MONTHS = 2
 N_ORIGINS = 12
+SEEDS = (7, 11, 23, 42, 101)
 METHODS = ("log_ratio", "direct")
 PRED_FLOOR = 100.0  # weekly dollars; matches the lowest rent load_leases accepts
 LGB_PARAMS = dict(objective="l1", learning_rate=0.05, num_leaves=63, min_data_in_leaf=20, feature_fraction=0.8,
@@ -120,8 +121,27 @@ class Model:
         return cls(lgb.Booster(model_file=str(stem.with_suffix(".txt"))), **meta)
 
 
-def fit_model(train: pd.DataFrame, cols: list[str], method: str, cfg: dict | None = None) -> Model:
+class SeedAverage:
+    """Average several fits in dollars. This removes seed luck: single seeds differ by about $0.50 to $0.70 on Fold B."""
+
+    def __init__(self, models: list):
+        self.models = models
+        first = models[0]
+        self.booster, self.method, self.cols, self.categories = first.booster, first.method, first.cols, first.categories
+
+    def predict(self, df: pd.DataFrame, car_space=None) -> np.ndarray:
+        return np.mean([m.predict(df, car_space) for m in self.models], axis=0)
+
+    def save(self, stem: Path) -> None:
+        for i, m in enumerate(self.models):
+            m.save(Path(f"{stem}_seed{i}"))
+
+
+def fit_model(train: pd.DataFrame, cols: list[str], method: str, cfg: dict | None = None):
     cfg = cfg or {}
+    if cfg.get("seeds"):
+        one = {k: v for k, v in cfg.items() if k != "seeds"}
+        return SeedAverage([fit_model(train, cols, method, {**one, "seed": s}) for s in cfg["seeds"]])
     if method not in METHODS:
         raise ValueError(f"unknown method {method!r}")
     train = ensure_best_anchor(train)

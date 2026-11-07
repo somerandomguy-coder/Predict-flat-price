@@ -22,3 +22,6 @@ Choices made without asking, so the team can overrule them.
 18. **Hackathon API calls are free,** which corrects item 10. The docs page is a JavaScript site, and the spec is at `/openapi.json`. Nothing from the API is in the current submission.
 19. **API data must be bounded.** `listings/rent-history` returns adverts after 31 July by default, so every call needs `to_date=2026-07-31`. Undated market fields (vacancy, street profile, mesh-block medians) may be built from later data and are not used. Static geography (transport, schools, amenities, zoning, risks, roads) is allowed.
 20. **`attrs_age_days` and `listed_age_days` are out of the model.** They were blank in 99.8% and 13.2% of fold rows, against 0% and 0.4% of final rows, so folds could not test them.
+21. **Raw last rent features are in** (`raw_prev_ratio`, `prev_m50`, `prev_gap_days`). The adoption rule was set before the Fold B test. Fold B moved from $42.51 to $40.37 (paired 95% interval -$3.45 to -$0.81), and it had already won on four earlier windows.
+22. **Predictions average 5 seeds.** This removes seed luck and is not claimed as an accuracy gain. Decision 15's $9.60 turned out to be the highest of 10 seeds (mean $3.48, and 7 of 10 favour within-building).
+

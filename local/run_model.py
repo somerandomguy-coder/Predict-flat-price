@@ -63,7 +63,7 @@ def main():
     panel.to_parquet(C.OUT_DIR / "features_panel.parquet")
     print(f"panel: {len(panel):,} rows, {panel.origin.nunique()} origins, {time.time() - started:.0f}s")
 
-    cfg = dict(name="stage5", frame=panel, n_origins=args.n_origins, num_boost_round=args.rounds, report_fold_a=True,
+    cfg = dict(name="stage5", frame=panel, seeds=M.SEEDS, n_origins=args.n_origins, num_boost_round=args.rounds, report_fold_a=True,
                description=f"Stage 5/7 LightGBM L1, {args.n_origins} rolling origins, method picked on Fold B",
                out_path=C.OUT_DIR / "metrics.json")
     res = M.run_experiment(cfg)

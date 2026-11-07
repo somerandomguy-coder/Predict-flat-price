@@ -110,3 +110,15 @@ def test_missing_flags_do_not_reveal_later_dates():
     assert len(later)
     X = F.build_features(cutoff, later[["gnaf_id"]].assign(target_date=cutoff + pd.Timedelta(days=30), car_space_resolved=1.0))
     assert X.attrs_age_days.isna().all() and (X.attrs_missing == 0).all()
+
+
+def test_raw_last_rent_never_uses_rows_after_the_cutoff(monkeypatch):
+    from src import features as F
+    from src.load import fold_test_rows, load_leases
+    cutoff = C.FOLDS["A"]["cutoff"]
+    t = fold_test_rows("A").head(2000)
+    before = F.build_features(cutoff, t)[F.RAW_PREV_COLS]
+    L = load_leases().copy()
+    L.loc[L.lease_date > cutoff, "rent"] *= 5
+    monkeypatch.setattr(F, "load_leases", lambda: L)
+    pd.testing.assert_frame_equal(before, F.build_features(cutoff, t)[F.RAW_PREV_COLS])

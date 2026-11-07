@@ -31,13 +31,14 @@ BED_SLOTS = 32
 ANCHORS = ["anchor_own", "anchor_bldg", "anchor_block"]
 ANCHOR_COLS = [f"{a}{s}" for a in ANCHORS for s in ("", "_age_days", "_n")]
 BLOCK_EXTRA = ["block_people_2026", "block_people_per_home_2026", "block_homes_growth"]
+RAW_PREV_COLS = ["raw_prev_ratio", "prev_m50", "prev_gap_days"]
 FEATURE_COLS = [
     "bedrooms", "bathrooms", "car_space_resolved", "floor_level", "flats_in_building",
     "block_new_homes_2021_2026", "block_homes_2026", *BLOCK_EXTRA, "latitude", "longitude", "suburb",
     "ever_advertised_for_lease",  # attrs_age_days and listed_age_days are out: 99.8% blank in folds, 0% in the final rows
     "floor_level_missing", "bathrooms_missing", "input_car_space_missing", "block_missing",
     *ANCHOR_COLS, "anchor_own_parking", "anchor_own_parking_match", "anchor_bldg_parking_match", "anchor_block_level",
-    "best_anchor", "best_anchor_source",
+    "best_anchor", "best_anchor_source", *RAW_PREV_COLS,
 ]
 CATEGORICAL_COLS = ["suburb"]
 
@@ -286,6 +287,20 @@ def _block_features(X: pd.DataFrame) -> pd.DataFrame:
     return X
 
 
+def _add_raw_prev(X: pd.DataFrame, cutoff) -> pd.DataFrame:
+    """The flat's last rent as advertised. About a quarter of re-lets within two years return at exactly that rent,
+    which an indexed anchor cannot show. Dated by the cutoff, like every other history feature."""
+    h = history_upto(cutoff).dropna(subset=["gnaf_id"])
+    if h.empty:  # leases with no flat link: nothing to carry forward
+        return X.assign(**{c: float("nan") for c in RAW_PREV_COLS})
+    last = h.groupby("gnaf_id").agg(rent=("rent", "last"), date=("lease_date", "last"))
+    rent = X.gnaf_id.map(last.rent).astype(float)
+    X["raw_prev_ratio"] = np.log(rent / X.best_anchor.astype(float))
+    X["prev_m50"] = (rent % 50 == 0).astype(float).where(rent.notna())
+    X["prev_gap_days"] = (cutoff - pd.to_datetime(X.gnaf_id.map(last.date))).dt.days.astype(float)
+    return X
+
+
 def build_features(cutoff_date, target_rows: pd.DataFrame, index_params: IndexParams = DEFAULT_PARAMS) -> pd.DataFrame:
     """target_rows needs gnaf_id, target_date, car_space_resolved. Returns one row per target row, in order.
 
@@ -320,6 +335,6 @@ def build_features(cutoff_date, target_rows: pd.DataFrame, index_params: IndexPa
     X["listed_missing"] = X.gnaf_id.map(raw.first_ever_listed).isna().astype("int8")
 
     X = _block_features(X)
-    X = _add_anchors(X, P, cutoff)
+    X = _add_raw_prev(_add_anchors(X, P, cutoff), cutoff)
     X["suburb"] = pd.Categorical(X.suburb, categories=sorted(load_input().suburb.dropna().unique()))
     return X
