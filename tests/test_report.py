@@ -14,7 +14,7 @@ GOOD = {
     "parking.json": {**REAL, "overall": {"premium": 60}},
     "floor.json": {**REAL, "per_floor_premium": 3.5},
 }
-TEMPLATE = Path(R.__file__).parents[1] / "PITCH_SCRIPT.md"
+TEMPLATE = Path(R.__file__).parents[1] / "notes" / "PITCH_SCRIPT.md"
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setattr(C, "DATA_DIR", tmp_path / "data")
     monkeypatch.setattr(C, "MOCK_TRUTH_CSV", tmp_path / "data" / "_frozen_truth.csv")
     monkeypatch.setattr(C, "MOCK", False)
-    (tmp_path / "PITCH_SCRIPT.md").write_text(TEMPLATE.read_text())
+    (tmp_path / "notes").mkdir(exist_ok=True); (tmp_path / "notes" / "PITCH_SCRIPT.md").write_text(TEMPLATE.read_text())
     return tmp_path
 
 
@@ -110,7 +110,7 @@ def test_pitch_refuses_mock(env, monkeypatch):
     put(env, GOOD)
     monkeypatch.setattr(C, "MOCK", True)
     assert R.main(["--pitch"]) == 2
-    assert not (env / "PITCH_SCRIPT.filled.md").exists()
+    assert not (env / "notes" / "PITCH_SCRIPT.filled.md").exists()
 
 
 @pytest.mark.parametrize("change", [{"metrics.json": REAL},

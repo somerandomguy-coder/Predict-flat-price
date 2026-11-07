@@ -1,69 +1,63 @@
-# Predict flat rents
+# What will this flat rent for?
 
-**Submission file:** [`submission/rents_2-bulbs-1-source.csv`](submission/rents_2-bulbs-1-source.csv). **Report:** [`report.html`](report.html).
+**Team 2 Bulbs 1 Source · Microburbs Hackathon, Task 4**
 
-For a plain summary of where the project stands, read [READING.md](READING.md).
+We estimate the weekly asking rent of all 65,777 City of Sydney flats, with and without a car space, as at 31 July 2026.
 
-We estimate the weekly asking rent for all 65,777 City of Sydney flats, with and without parking, as at 31 July 2026.
+| Deliverable | File |
+|---|---|
+| Submission | [`submission/rents_2-bulbs-1-source.csv`](submission/rents_2-bulbs-1-source.csv) |
+| Report | [`report.html`](report.html) |
+| 45-second pitch | [`pitch.mp4`](pitch.mp4) |
+| Demo | [`demo.mp4`](demo.mp4) |
+
+## Result
+
+Held-out test on 2,635 adverts from June and July 2026, for the submitted file:
+
+| Median error | Within $100 | R² | Bias |
+|---|---|---|---|
+| **$40 a week** | **82.47%** | **0.902** | **$0** |
+
+Before rounding to $10, the blend's median error is $38.02. A suburb, bedrooms and parking median scores $100 on the same test. Microburbs reports $86 on different adverts, so that comparison is indicative only.
 
 ## Who it helps
-- **Tenants** can check whether an advertised rent looks fair, and what a car space should add.
-- **Landlords** can set a rent from evidence, not from an old lease.
-- **Buyers and investors** can see the likely rent of a flat before they buy it, and what parking or a higher floor is worth.
-
-## Data
-- Flat list, past lease adverts, and the mesh block homes and people file, supplied by Microburbs and the hackathon.
-- G-NAF address identifiers and ABS mesh blocks.
-- NSW rental bond data, only if a run records that it was used. Then: © State of New South Wales. For current information go to www.nsw.gov.au.
-
-**Supplied data and derived rows are not in this repo, and must never be committed.** That covers supplied files, API output, keys, and any row-level result, including `rents_*.csv`. See `.gitignore`. Only code and totals or averages are committed.
+- **Tenants** can check whether an asking rent looks fair, and what a car space adds.
+- **Landlords** can set a rent from evidence, and see what a space could earn on its own.
+- **Buyers and investors** can compare likely rent before buying.
 
 ## The clever step
-An old rent is a low rent when the market is rising. A naive estimate copies the last rent seen, so it runs low. We take the closest past rent for each flat (its own, then its building, then its block) and move it forward to the target date with a rent index. The model works from that adjusted rent, not the stale one.
+An old rent reads low when the market is rising. We take the closest past rent for each flat (its own, its building's, then its block's) and bring it up to date with an index built from flats leased more than once.
 
-Testing copies real use. Each test predicts two months ahead using only what was known at the time, so no flat can see its own advert. We tune on Fold B and never tune on Fold A, though it has been run several times and its adverts were used in our leak check.
+We also show the model the raw last rent, because many re-lets return at exactly the old rent. A nine-model blend then decides how far to trust each clue.
+
+Every test predicts two months ahead using only what was known at the time. We also found that input parking and bedrooms track each flat's latest advert, so we rebuilt them as known at each cutoff.
+
+## Data
+Microburbs supplied the flat list, past lease adverts, and block homes and people file. **They are not in this repo.** The submission CSV is the only row-level file here, as the task requires.
 
 ## How to run
-
-### Local
+Put the supplied files in `data/`, then:
 ```
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
-# put the supplied files in data/
-PYTHONPATH=. .venv/bin/python local/run_baseline.py
-PYTHONPATH=. .venv/bin/python -m src.report           # writes report.html
-PYTHONPATH=. .venv/bin/python -m src.report --pitch   # writes PITCH_SCRIPT.filled.md
+PYTHONPATH=. .venv/bin/python local/run_model.py    # LightGBM model and submission
+PYTHONPATH=. .venv/bin/python -m src.report         # report.html
 ```
-Set `TEAM_SLUG` to name the submission file.
-
-To try it without supplied data, make the mock data and set `FLATS_MOCK=1`. Everything then goes to `out/mock/`, and the report carries a large synthetic banner:
-```
-PYTHONPATH=. FLATS_MOCK=1 .venv/bin/python local/make_mock.py
-PYTHONPATH=. FLATS_MOCK=1 .venv/bin/python local/run_baseline.py
-PYTHONPATH=. FLATS_MOCK=1 .venv/bin/python -m src.report
-PYTHONPATH=. FLATS_MOCK=1 .venv/bin/python -m src.report --fixture   # layout test, fake numbers
-```
-
-### Colab
-Upload a notebook from `colab/` to Google Colab. Keep the supplied data in your own Drive and set `FLATS_DATA_DIR` to that folder. Results come back through Drive. Clear notebook outputs before committing.
-
-## Report inputs
-`src/report.py` reads aggregate JSON from `out/real/`. The expected shapes are in `INPUTS` at the top of that file. A missing input shows as pending. A real run stops if any input is not stamped real, so lanes should write `"provenance": src.report.provenance()` into each file. Hand-written text goes in `notes/report_text.json`.
-
-See `PLAN.md` for how the work is split and `DECISIONS.md` for choices made along the way.
+The submitted blend comes from `local/zoo/stack.py`, using the jobs in `slurm/`. To explore on Google Colab, see [`colab/README.md`](colab/README.md).
 
 ## Sources
 Used in the submitted model:
-- Microburbs supplied files: flat list, past lease adverts, and block homes and people. These are not in this repo.
+- Microburbs supplied files.
 
-Tested in experiments, not in the final model (see `notes/public_data.md` and `notes/api_features.md`):
-- Microburbs API: adverts dated by 31 July 2026, transport, schools, amenities, risks, market series.
+Tested in experiments, not in the final model:
+- Microburbs API: adverts dated by 31 July 2026, transport, schools, amenities, risks and market series.
 - G-NAF, Geoscape, Open G-NAF licence.
 - ABS Census 2021 and mesh block counts, CC BY 4.0.
 - OpenStreetMap, ODbL, © OpenStreetMap contributors.
 - NSW cadastre, NSW Spatial Services, CC BY 3.0 AU.
-- City of Sydney Development Monitoring.
+- City of Sydney Development Monitoring, CC BY 4.0.
 
-Research sources are listed in `notes/domain_research.md`. Voice is generated with ElevenLabs.
+Pitch voice by ElevenLabs. Research sources are in [`notes/domain_research.md`](notes/domain_research.md).
 
-`submission/rents_2-bulbs-1-source.csv` is the required hand-in and the only row-level file in the repo. It holds the blend from `lane/zoo`, rounded to $10.
-
+## More detail
+Decisions, experiments and research are in [`notes/`](notes/). Start with [`notes/READING.md`](notes/READING.md).

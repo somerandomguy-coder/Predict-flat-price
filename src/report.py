@@ -712,12 +712,12 @@ def pitch_values(data: dict) -> dict:
 def fill_pitch() -> Path:
     data, _ = load_inputs()
     require_real(data)
-    template = (C.ROOT / "PITCH_SCRIPT.md").read_text(encoding="utf-8")
+    template = (C.ROOT / "notes" / "PITCH_SCRIPT.md").read_text(encoding="utf-8")
     values = pitch_values(data)
     missing = sorted(set(re.findall(r"\{\{(\w+)\}\}", template)) - set(values))
     if missing:
         raise Refused("no usable value for: " + ", ".join(missing))
-    out = C.ROOT / "PITCH_SCRIPT.filled.md"
+    out = C.ROOT / "notes" / "PITCH_SCRIPT.filled.md"
     out.write_text(re.sub(r"\{\{(\w+)\}\}", lambda m: values[m.group(1)], template), encoding="utf-8")
     return out
 
