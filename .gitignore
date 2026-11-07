@@ -1,0 +1,18 @@
+# Supplied files, API output, keys and derived row-level data: NEVER commit
+data/
+*.parquet
+.env
+.env.*
+api_cache/
+out/
+dist/
+rents_*.csv
+*.zip
+
+# Local tooling
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.claude/worktrees/
+catboost_info/
