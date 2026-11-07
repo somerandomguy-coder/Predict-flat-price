@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[1]
 m = json.load(open(ROOT / "out/real/metrics.json"))["folds"]["A"]
 VALUES = dict(flats="65,777", with_=1010, without=930, miss=round(m["mae"]), within=round(m["within100"] * 100),
-              areas=[("Surry Hills", 85), ("Sydney CBD", 78), ("Pyrmont", 67), ("Waterloo", 26)]  # one method: same year, same building)
+              areas=[("Surry Hills", 85), ("Sydney CBD", 78), ("Pyrmont", 67), ("Waterloo", 26)])  # one method: same year, same building
 V = VALUES
 gap = V["with_"] - V["without"]
 W, H, FPS = 1280, 720, 24
