@@ -59,6 +59,19 @@ def flats_asof(cutoff_date) -> pd.DataFrame:
     f["first_ever_listed"] = f.first_ever_listed.where(f.first_ever_listed <= cutoff)
     seen = pd.Index(history_upto(cutoff).gnaf_id.dropna().unique(), dtype="object")
     f["ever_advertised_for_lease"] = (_codes(seen, f.gnaf_id) >= 0).astype("int8")  # Series.isin is very slow on Arrow strings
+    return f if cutoff >= C.AS_OF else _attrs_asof(f, history_upto(cutoff))
+
+
+def _attrs_asof(f: pd.DataFrame, hist: pd.DataFrame) -> pd.DataFrame:
+    """Replace attributes with each flat's latest advert on or before the cutoff.
+
+    The input is a 31 July snapshot built from each flat's latest advert: in 2026 adverts it disagrees on parking
+    0.1% of the time, while consecutive adverts of a flat change parking 6.2% of the time. Used as is, a fold would
+    see its test advert's own parking and bedrooms. Flats with no earlier advert keep the input value.
+    """
+    for col, src in (("car_space", "advert_car_space"), ("bedrooms", "bedrooms"), ("bathrooms", "bathrooms")):
+        last = hist.dropna(subset=[src, "gnaf_id"]).groupby("gnaf_id")[src].last()
+        f[col] = f.gnaf_id.map(last).fillna(f[col])
     return f
 
 
@@ -207,7 +220,7 @@ def _add_anchors(X: pd.DataFrame, P: dict, cutoff: pd.Timestamp) -> pd.DataFrame
     grow = index.at(X.target_date, X.suburb)
     wait = (X.target_date - cutoff).dt.days.to_numpy(dtype=float)  # ages are measured to target_date
     premium = P["premium"][index.codes(X.suburb)]
-    p = X.car_space_resolved.to_numpy(dtype=float)
+    p = X.input_car_space.to_numpy(dtype=float)  # parking as known at the cutoff, never the target advert's own
     p = np.where(np.isnan(p), np.nan, (p > 0).astype(float))
     gnaf, bldg, bed = _codes(P["gnaf_ix"], X.gnaf_id), _codes(P["bldg_ix"], X.building_key), _bed_code(X.bedrooms)
     p_i = np.where(np.isnan(p), -1, p).astype("int64")
@@ -285,6 +298,7 @@ def build_features(cutoff_date, target_rows: pd.DataFrame, index_params: IndexPa
     P = memo(leases, ("prepare", cutoff, index_params), lambda: _prepare(leases, cutoff, index_params), maxsize=64)
     flats = flats_asof(cutoff)
     flats["input_car_space_missing"] = flats.car_space.isna().astype("int8")
+    flats["input_car_space"] = flats.car_space.astype(float)
     flats = flats.drop(columns=["address", "building_address", "car_space"])
     rows = target_rows.reset_index(drop=True)
     rows = rows.drop(columns=[c for c in rows.columns if c in flats.columns and c != "gnaf_id"])

@@ -70,7 +70,7 @@ def test_very_short_or_sparse_history_does_not_crash():
 
 
 def test_zero_at_cutoff_and_rises_after():
-    i = fit_index(history(), CUTOFF)
+    i = fit_index(history(), CUTOFF, IndexParams())
     a = i.at([CUTOFF, CUTOFF + pd.Timedelta(days=61)])
     assert a[0] == pytest.approx(0, abs=1e-9)
     assert a[1] == pytest.approx(GROWTH * 61 / 365.25, abs=0.005)
@@ -79,11 +79,11 @@ def test_zero_at_cutoff_and_rises_after():
 def test_damping_and_horizon_limit_the_projection():
     h = history()
     later = CUTOFF + pd.Timedelta(days=61)
-    full = fit_index(h, CUTOFF).at([later])[0]
-    half = fit_index(h, CUTOFF, replace(DEFAULT_PARAMS, damping=0.8)).at([later])[0]
-    flat = fit_index(h, CUTOFF, replace(DEFAULT_PARAMS, damping=0.0)).at([later])[0]
+    full = fit_index(h, CUTOFF, IndexParams()).at([later])[0]
+    half = fit_index(h, CUTOFF, replace(IndexParams(), damping=0.8)).at([later])[0]
+    flat = fit_index(h, CUTOFF, replace(IndexParams(), damping=0.0)).at([later])[0]
     assert flat == pytest.approx(0, abs=1e-9) and 0 < half < full
-    capped = fit_index(h, CUTOFF, replace(DEFAULT_PARAMS, max_horizon_months=1.0))
+    capped = fit_index(h, CUTOFF, replace(IndexParams(), max_horizon_months=1.0))
     a = capped.at([CUTOFF + pd.Timedelta(days=60), CUTOFF + pd.Timedelta(days=300)])
     assert a[0] == pytest.approx(a[1])
 

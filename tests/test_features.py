@@ -56,14 +56,15 @@ def test_suburb_categories_do_not_depend_on_rows():
     assert list(a.suburb.cat.categories) == list(b.suburb.cat.categories)
 
 
-def test_parking_moves_every_anchor_up():
+def test_target_advert_parking_never_moves_anchors():
+    """Anchors use parking known at the cutoff. The target advert's own parking is not known then."""
     from src.features import build_features
-    w, wo = build_features(CUTOFF, all_flats(1.0)), build_features(CUTOFF, all_flats(0.0))
+    from src.load import fold_test_rows
+    t = fold_test_rows("A").head(2000)
+    a = build_features(C.FOLDS["A"]["cutoff"], t.assign(car_space_resolved=1.0))
+    b = build_features(C.FOLDS["A"]["cutoff"], t.assign(car_space_resolved=0.0))
     for c in ("anchor_own", "anchor_bldg", "anchor_block", "best_anchor"):
-        assert (w[c] / wo[c]).dropna().median() > 1.02, c
-    for c in ("anchor_own", "anchor_block"):  # anchor_bldg compares different flats per pass, so only its median must rise
-        assert ((w[c] >= wo[c]) | w[c].isna()).all(), c
-
+        pd.testing.assert_series_equal(a[c], b[c])
 
 def test_bldg_anchor_leaves_out_the_flat_itself(monkeypatch):
     from src import features as F

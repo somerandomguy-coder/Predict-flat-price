@@ -200,7 +200,7 @@ def report_methods(panel: pd.DataFrame, compared: dict, winner: str, winner_a: d
     folds = {"B": fold_rows(panel, "B")} | ({"A": fold_rows(panel, "A")} if winner_a else {})
     out = []
     if "base_suburb" in panel.columns:
-        out.append(dict(key="suburb_median", label="Suburb median", folds={k: suburb_score(t) for k, t in folds.items()}))
+        out.append(dict(key="suburb_median", label="Suburb-only median (ours)", folds={k: suburb_score(t) for k, t in folds.items()}))
     out.append(dict(key="baseline", label="Suburb x bedroom x parking median",
                     folds={k: baseline_score(t) for k, t in folds.items()}))
     out.append(dict(key="final", label=METHOD_LABELS[winner],

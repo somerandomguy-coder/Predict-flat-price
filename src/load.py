@@ -17,6 +17,7 @@ LEASE_ALIASES = {
     "bedrooms": ["bedrooms", "beds", "bed"],
     "bathrooms": ["bathrooms", "baths", "bath"],
 }
+MAX_FLOOR = 90  # Sydney has no taller residential tower
 RENT_MIN, RENT_MAX = 100, 10_000  # weekly dollars; outside this is a data error, not a rent
 
 
@@ -52,6 +53,7 @@ def load_input() -> pd.DataFrame:
     df["building_key"] = norm_addr(df.building_address)
     for c in ("first_ever_listed", "attrs_last_seen"):
         df[c] = parse_date(df[c])
+    df["floor_level"] = df.floor_level.where(df.floor_level <= MAX_FLOOR)  # higher values are unit numbers read as floors
     return df
 
 

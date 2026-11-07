@@ -425,7 +425,7 @@ def sec_error(data, problems) -> str:
     def mae(k):
         return fold_metrics(method(m, k), "A")["mae"]
 
-    rows = [("Suburb median", [(mae("suburb_median"), "s1", "ours")]),
+    rows = [("Suburb-only median (ours)", [(mae("suburb_median"), "s1", "ours")]),
             ("Microburbs valuation (their figure)", [(float(MICROBURBS_MAE), "s2", "published")]),
             ("Our baseline", [(mae("baseline"), "s1", "ours")]),
             ("Final model", [(mae("final"), "s1", "ours")])]
@@ -516,7 +516,11 @@ def sec_limits() -> str:
              "Flats that are advertised often are better covered than flats that rarely change hands.",
              "The parking and floor premiums are patterns in adverts. Other differences between flats may be mixed in.",
              "Estimates describe a typical flat of that kind. Renovations, views and condition are mostly invisible to the data.",
-             "The test periods cover four months of 2026, so a sudden market change could behave differently."]
+             "The test periods cover four months of 2026, so a sudden market change could behave differently.",
+             "Our folds may flatter us. Flats with no earlier advert keep input fields that may come from the test advert itself, and fold adverts number about 1,300 a month against 1,699 scored over two months, so the scored adverts may be a different mix.",
+             "Fold A was not perfectly untouched. No setting was tuned on it, but the check that found the input leak looked at its adverts, and it was rerun after that fix.",
+             "We have no floor area or building age, so bigger or newer flats that have parking can inflate the premium. Treat it as an upper estimate. The two premium methods tied on median error on Fold B.",
+             "Microburbs' $86 was measured on the frozen August and September adverts, not on our folds, so the comparison is indicative only."]
     return section(None, "Limitations", None, "<ul>" + "".join(f"<li>{esc(i)}</li>" for i in items) + "</ul>")
 
 

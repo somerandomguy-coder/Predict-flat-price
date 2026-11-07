@@ -35,7 +35,7 @@ class IndexParams:
     use_index: bool = True            # False gives a flat index, for "before index" comparisons
 
 
-DEFAULT_PARAMS = IndexParams()
+DEFAULT_PARAMS = IndexParams(damping=0.0, trend_months=6)  # tuned on real Fold B: holding the index flat past the cutoff won
 
 _MEMO: OrderedDict = OrderedDict()
 
