@@ -87,5 +87,6 @@
  ],
  "limitations": [
   "Rounding to $10 means errors fall on $10 steps, so the median can jump in steps on the real adverts. Fold B's blend weights also saw Fold B, so its $39.87 is not a clean test."
- ]
+ ],
+ "parking_note": "How to read these numbers. The table pools every year since 2015 and adjusts with one citywide index, which gives Waterloo $4 (95% range -$7 to $15). Comparing flats only within the same building and year gives $26 for Waterloo, $67 for Pyrmont, $78 for Sydney and $85 for Surry Hills. That view is closer to today, because the premium has risen faster than rents, and it is what our pitch video shows. A third view is the gap in our submitted file, which is smoothed flat by flat: its median is $0 in Waterloo, where 57% of flats get no gap, and $70 in Pyrmont. Waterloo is low on every view, but $4 and $0 are probably too low."
 }

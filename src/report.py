@@ -418,7 +418,9 @@ def sec_parking(data, problems) -> str:
     body += premium_block("By bedroom count, $/week", "Bedrooms", premium_rows(bed_rows, "bedrooms", beds),
                           "premium by bedroom count. " + p, rank=False)
     lead = "Each flat gets two estimates, with and without a car space. The gap is what parking is worth in rent."
-    return section(2, "What a car space is worth", lead, body)
+    note = text_of(dig(data.get("report_text"), "parking_note"))
+    extra = f'<p class="note">{esc(note)}</p>' if note else ""
+    return section(2, "What a car space is worth", lead, body + extra)
 
 
 def sec_floor(data, problems) -> str:
