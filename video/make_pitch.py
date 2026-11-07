@@ -102,7 +102,7 @@ if VOICE:  # each scene lasts as long as its narration, plus a short pause
     length = lambda c: float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(c)]))
     lens = [length(c) for c in clips]
     BASE = {f: d for f, d in SCENES}
-    SCENES = [(f, l + .45 + (.9 if i == len(SCENES) - 1 else 0)) for i, ((f, d), l) in enumerate(zip(SCENES, lens))]
+    SCENES = [(f, l + .35 + (.7 if i == len(SCENES) - 1 else 0)) for i, ((f, d), l) in enumerate(zip(SCENES, lens))]
 out = ROOT / "video/audio/silent.mp4" if VOICE else ROOT / "pitch.mp4"
 ff = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                        "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-shortest", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",

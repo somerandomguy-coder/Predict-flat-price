@@ -9,7 +9,7 @@ LINES = [
     "Our model prices both, for every flat. Without the space, about nine hundred and thirty. That's eighty dollars a week, over four thousand a year.",
     "A tenant with no car can ask for the flat without it. An owner can lease the space to someone who needs it.",
     "Tested on two thousand six hundred later adverts, our typical miss was about forty dollars a week, and eighty-two percent landed within a hundred.",
-    "And it changes by area. Across Pyrmont, a space is worth about sixty-seven dollars. In Waterloo, about twenty-six.",
+    "It changes by area: about sixty-seven dollars across Pyrmont, twenty-six in Waterloo.",
     "Know what you are paying for. Two Bulbs, One Source.",
 ]
 H = {"xi-api-key": KEY, "User-Agent": "predict-flat-price-pitch", "Content-Type": "application/json"}
