@@ -12,7 +12,8 @@
  "what_didnt": [
   "Projecting the rent trend forward. Tuning on Fold B chose to hold the index flat at the cutoff.",
   "Separating the two model targets. Log(rent / anchor) beat rent by about $1 on Fold B, and the winner changed when we removed features, so treat that choice as close to noise.",
-  "Getting one clean parking number. Measured within buildings, a space is worth about $40 a week, but the submitted gap is the model's, with a median of $17, because it did better on 85 Fold B adverts whose parking changed. That sample is small, and the gap is compressed because anchors stay fixed between passes."
+  "Getting one clean parking number. Measured within buildings, a space is worth about $40 a week, but the submitted gap is the model's, with a median of $17, because it did better on 85 Fold B adverts whose parking changed. That sample is small, and the gap is compressed because anchors stay fixed between passes.",
+  "Public data. Thirteen sets of open-data features (G-NAF, OpenStreetMap, Census, cadastre, transport and amenities) gave no gain overall on Fold B. The best set helped first-time flats by perhaps $1 to $2 but cost flats with history about $1, and its first result did not repeat on fresh seeds."
  ],
  "journey": [
   {

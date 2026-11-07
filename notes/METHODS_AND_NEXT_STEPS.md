@@ -105,3 +105,6 @@ A probe hit `listings/rent-history` without a date bound and got 200 adverts dat
 These were measured on earlier windows, not Fold B, and need confirming there after the lanes finish.
 1. Raw last rent features: -$1.66 on windows to March 2026 (95% CI -$2.36 to -$0.93), because many re-lets return at exactly the old rent.
 2. Rounding to where adverts cluster. This exploits how a median behaves and does not move mean error, so test it and describe it plainly if used.
+
+## Public data result (`notes/public_data.md`)
+No open data set improved Fold B overall, so none is in the submission. Floor blanks cannot be filled from G-NAF, because the supplied field already comes from it. All block blanks can be filled, with no gain. The best untried lead for floor area is NSW Property Sales, which blocks automated downloads and needs a person with a browser.
