@@ -27,3 +27,4 @@ Choices made without asking, so the team can overrule them.
 23. **The foundation model blend is not in the submission.** CatBoost + TabICL + RealMLP gained $1.83 on Fold B and $1.44 on a holdout, but it was picked from 23 blends, tested without raw rent features, and needs about 40 minutes of CPU. It is the first thing to retest after the hackathon.
 24. **Fold A was read for the final model at 14:06.** The result is $40.25, 80.8% within $100, R² 0.899, bias +$3.21. Do not choose anything on it after this point.
 
+25. **The pitch uses real numbers, not the draft's $900 and $720.** A typical Pyrmont 2-bedroom in our file is $1,010 with parking and $935 without, so the space is about $75 a week. `video/make_pitch.py` re-renders in about a minute. `demo.mp4` is a scroll through `report.html`, because there is no app.
