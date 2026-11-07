@@ -34,8 +34,8 @@ BLOCK_EXTRA = ["block_people_2026", "block_people_per_home_2026", "block_homes_g
 FEATURE_COLS = [
     "bedrooms", "bathrooms", "car_space_resolved", "floor_level", "flats_in_building",
     "block_new_homes_2021_2026", "block_homes_2026", *BLOCK_EXTRA, "latitude", "longitude", "suburb",
-    "attrs_age_days", "listed_age_days", "ever_advertised_for_lease",
-    "floor_level_missing", "bathrooms_missing", "input_car_space_missing", "block_missing", "attrs_missing", "listed_missing",
+    "ever_advertised_for_lease",  # attrs_age_days and listed_age_days are out: 99.8% blank in folds, 0% in the final rows
+    "floor_level_missing", "bathrooms_missing", "input_car_space_missing", "block_missing",
     *ANCHOR_COLS, "anchor_own_parking", "anchor_own_parking_match", "anchor_bldg_parking_match", "anchor_block_level",
     "best_anchor", "best_anchor_source",
 ]

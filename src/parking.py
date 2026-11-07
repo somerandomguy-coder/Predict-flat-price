@@ -340,19 +340,22 @@ def compare_premium_methods(df: pd.DataFrame, premium: pd.Series, anchors=ANCHOR
 
 
 MIN_FLIPPED = 30  # fewer adverts than this cannot separate two premiums
+CLEAR_WIN = 5.0  # dollars of median error on flipped adverts
 
 
 def pick_premium(comparison: pd.DataFrame) -> tuple[str, str]:
     """Choose 'within_building' or 'two_pass' from compare_premium_methods output on Fold B.
 
-    Flipped adverts are the direct test, because only they score the side a flat's input does not
-    claim. With too few of them, fall back to changing only the gap on every advert (premium_mid).
+    Within-building is the default: it is a direct measurement, while the two-pass gap is compressed because
+    anchors stay fixed between passes. Flipped adverts are few, so two-pass must win them clearly to replace it.
     """
     c = comparison.set_index(["method", "segment"])
-    flipped = c.loc[("model", "flipped")]
-    seg = "flipped" if flipped["n"] >= MIN_FLIPPED else "all"
-    better = c.loc[("premium_mid", seg), "d_mae"] < 0
-    return ("within_building" if better else "two_pass"), f"Fold B premium_mid vs model on {seg} adverts"
+    if c.loc[("model", "flipped"), "n"] < MIN_FLIPPED:
+        return "within_building", "default: too few flipped adverts on Fold B"
+    d = c.loc[("premium_mid", "flipped"), "d_mae"]
+    if d > CLEAR_WIN:
+        return "two_pass", f"two-pass beat within-building by ${d:.2f} on Fold B flipped adverts"
+    return "within_building", f"default: two-pass margin on Fold B flipped adverts was ${d:.2f}, under ${CLEAR_WIN:.0f}"
 
 
 # ---------- report aggregates ----------

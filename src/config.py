@@ -10,7 +10,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 MOCK = os.environ.get("FLATS_MOCK") == "1"
-TEAM_SLUG = os.environ.get("TEAM_SLUG", "TEAM_SLUG")
+TEAM_SLUG = os.environ.get("TEAM_SLUG", "2-bulbs-1-source")
 
 DATA_DIR = Path(os.environ.get("FLATS_DATA_DIR", ROOT / "data" / ("mock" if MOCK else "")))
 OUT_DIR = ROOT / "out" / ("mock" if MOCK else "real")

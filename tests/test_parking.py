@@ -243,11 +243,11 @@ def _cmp(flipped_n, flipped_d, all_d):
     return pick_premium(pd.DataFrame(rows))[0]
 
 
-def test_pick_premium_trusts_flipped_adverts_when_there_are_enough():
+def test_pick_premium_defaults_to_the_direct_measurement():
     assert _cmp(50, -5.0, 3.0) == "within_building"
-    assert _cmp(50, 5.0, -3.0) == "two_pass"
+    assert _cmp(50, 4.0, 3.0) == "within_building"
+    assert _cmp(5, 50.0, 50.0) == "within_building"
 
 
-def test_pick_premium_falls_back_to_all_adverts_when_flipped_is_thin():
-    assert _cmp(5, -5.0, 3.0) == "two_pass"
-    assert _cmp(5, 5.0, -3.0) == "within_building"
+def test_pick_premium_needs_a_clear_two_pass_win():
+    assert _cmp(50, 6.0, -3.0) == "two_pass"

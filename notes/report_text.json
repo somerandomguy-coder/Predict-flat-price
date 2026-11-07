@@ -3,7 +3,7 @@
   "mode": "real",
   "generated_at": "2026-11-07T01:04:56+00:00"
  },
- "surprising_finding": "A flat's own old rent beats everything else, even when it is stale. The typical own rent we used was about 20 months old, yet once indexed it missed by $41 on Fold A, against $100 for a recent suburb, bedrooms and parking median. The second surprise was in the supplied input: its parking and bedrooms track each flat's latest advert, so a simple date split quietly shows a model the answer. We rebuilt those fields as known at each cutoff.",
+ "surprising_finding": "A flat's own old rent beats everything else, even when it is stale. The typical own rent we used was about 20 months old, yet once indexed it missed by about $41 on Fold A, against $100 for a recent suburb, bedrooms and parking median. The second surprise was in the supplied input: its parking and bedrooms track each flat's latest advert, so a simple date split quietly shows a model the answer. We rebuilt those fields as known at each cutoff.",
  "what_worked": [
   "Indexing each flat's own last rent to the target date. This took the Fold A anchor bias from -$50 to +$3.62.",
   "Rolling two-month training windows, so each training row faces the same gap as the real task.",
@@ -11,7 +11,7 @@
  ],
  "what_didnt": [
   "Projecting the rent trend forward. Tuning on Fold B chose to hold the index flat at the cutoff.",
-  "Predicting log(rent / anchor) instead of rent. The two were within $0.10 on Fold B, so the choice between them is noise.",
-  "The model's own with and without gap. It came out around $17 against a measured $36, because anchors stay fixed between passes. On Fold B the two premiums tied on median error, so we chose the within-building premium for its lower bias on flipped adverts and its higher share within $100."
+  "Separating the two model targets. Log(rent / anchor) beat rent by about $1 on Fold B, and the winner changed when we removed features, so treat that choice as close to noise.",
+  "Getting one clean parking number. Measured within buildings, a space is worth about $40 a week, but the submitted gap is the model's, with a median of $17, because it did better on 85 Fold B adverts whose parking changed. That sample is small, and the gap is compressed because anchors stay fixed between passes."
  ]
 }
