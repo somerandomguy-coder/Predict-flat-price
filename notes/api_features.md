@@ -50,11 +50,11 @@ Paired figures compare seed-averaged predictions, so they differ from the gap be
 - **Default Python client is refused.** Cloudflare error 1010 blocks the Python-urllib signature, so `src/api.py` sends an honest project User-Agent. My first run wrongly cached those refusals as "outside coverage"; the 9 files were removed, and only the API's own JSON 403 now counts.
 
 ## Sale history: partial, not tested
-SALE_STATUS_PLACEHOLDER
+The pull was stopped by time limit at 13:50. Cached: **15,808 of 60,552 covered flats (26.1%)**, including 15,150 of the 25,044 flats with adverts since 2024 (60.5%). None holds a sale after the cutoff, and no temporary files were left.
 
 It was deliberately not tested as a feature. Partial coverage would differ between fold rows and final rows, the skew removed in DECISIONS 20. `add_sales` is written and unit-tested but not called, and `local/api_experiment.py` has no sales test. Every sale is cut to 31 July before caching, and `add_sales` cuts to each row's origin.
 
-**Follow-up for teammate compute:** finish the pull (`local/pull_api.py sales`, resumable, about 100 minutes at 8 workers), confirm with `local/check_api_cache.py`, compare blank rates, then test on Fold B. It is the best untested idea for first-time flats, because a flat's price is a stand-in for size and quality.
+**Follow-up for teammate compute:** finish the remaining 44,744 flats (`local/pull_api.py sales`, resumable; about 2 hours at the 2 workers now set, which ran 6-7 calls a second), confirm with `local/check_api_cache.py`, compare blank rates, then test on Fold B. It is the best untested idea for first-time flats, because a flat's price is a stand-in for size and quality.
 
 ## Endpoints and dating evidence
 `src/api.py` allows only the endpoints below, and any other is refused in code.
@@ -81,7 +81,7 @@ Not called: every endpoint on the banned list. `properties/{id}/rent-history` wa
 
 ## Coverage
 - Representatives: one flat for each of 3,023 (suburb, building_key) pairs. 99% of keys span under about 70 m. The brief's 7,400 coordinates were reduced for time.
-- Cache check (`local/check_api_cache.py`): all suburb series and shapes 29 of 29, advert pages 141 of 141, all five building endpoints 3,023 of 3,023, no temporary files, nothing later than the cutoff. Vacancy data exists for 25 of 29 suburbs.
+- Cache check (`local/check_api_cache.py`): all suburb series and shapes 29 of 29, advert pages 141 of 141, all five building endpoints 3,023 of 3,023, sale history partial as above, no temporary files, nothing later than the cutoff. Vacancy data exists for 25 of 29 suburbs.
 - Newtown, Paddington, Annandale and St Peters (5,225 flats) are outside coverage and stay blank.
 
 Blank rate, Fold B rows / training rows / final rows. Rates match closely, so the earlier fold skew is not present:
