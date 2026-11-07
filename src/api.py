@@ -162,6 +162,16 @@ def get(path: str, params: dict | None = None, refresh: bool = False):
     return body
 
 
+def cached(path: str, params: dict | None = None):
+    """The cached body, or None. Never touches the network, so joins cannot pull data."""
+    params = dict(params or {})
+    target = _cache_path(_endpoint(path), path, params)
+    if not target.exists():
+        return None
+    body = json.loads(target.read_text(encoding="utf-8"))
+    return None if body.get("denied") else body
+
+
 def get_many(jobs: list, workers: int = MAX_WORKERS, progress_every: int = 2000) -> list:
     """Run (path, params) jobs, at most MAX_WORKERS at a time. Failures come back as the exception, not raised."""
     done = [0]

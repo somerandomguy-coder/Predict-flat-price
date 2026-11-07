@@ -13,10 +13,10 @@ def covered_suburbs() -> list:
 
 
 def representatives() -> list:
-    """One flat per unique coordinate in a covered suburb. A building_key can span several coordinates."""
+    """One flat per building. 99% of keys span under about 70 m; suburb is included because a key does not name one."""
     f = load_input()
     f = f[f.suburb.isin(covered_suburbs())]
-    return f.drop_duplicates(["latitude", "longitude"]).gnaf_id.astype(str).tolist()
+    return f.drop_duplicates(["suburb", "building_key"]).gnaf_id.astype(str).tolist()
 
 
 def report(tag: str, out: list) -> None:

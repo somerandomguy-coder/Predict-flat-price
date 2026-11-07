@@ -110,5 +110,61 @@ def history_test() -> None:
     (OUT / "history.json").write_text(json.dumps(results, indent=1))
 
 
+GROUPS = dict(
+    transport=["train_m", "light_rail_m", "bus_m", "ferry_m", "bus_stops_2km"],
+    amenities=["supermarket_m", "green_m", "restaurant_m", "supermarkets_1km", "green_1km", "restaurants_1km", "restaurants_300m"],
+    schools=["school_m", "public_primary_m", "public_secondary_m", "schools_1km", "private_schools_1km"],
+    risks=["heritage_on", "heritage_m", "flood_on", "flood_m", "hv_line_m", "environment_m", "public_housing_share"],
+    roads_noise=["road_major_m", "road_any_m", "noise", "noise_max_150m"],
+    planning=["height_limit_m", "fsr_limit", "zoning"],
+)
+
+
+def with_api(p: pd.DataFrame, sales: bool) -> pd.DataFrame:
+    p = AF.add_market(AF.add_geo(p))
+    return AF.add_sales(p) if sales else p
+
+
+def blank_rates(p: pd.DataFrame, cols: list) -> pd.DataFrame:
+    """Blank share in Fold B test rows, training rows and final rows. Final rows are built with this module's joins."""
+    fin = P.final_rows().assign(origin=C.AS_OF)
+    fin = with_api(fin, "sale_log_price" in cols)
+    train = M.train_rows(p, C.FOLDS["B"]["cutoff"], M.N_ORIGINS)
+    return pd.DataFrame({"fold_b": M.fold_rows(p, "B")[cols].isna().mean(), "train_b": train[cols].isna().mean(), "final": fin[cols].isna().mean()}).round(4)
+
+
+def feature_test(sales: bool = False, history: str | None = None) -> None:
+    base = panel(None)
+    ft = base.anchor_own.isna().loc[M.fold_rows(base, "B").index]
+    p = with_api(panel(history), sales)
+    cols = base_cols(base)
+    all_geo = [c for g in GROUPS.values() for c in g]
+    new = all_geo + ["crime_rate"] + AF.MARKET_COLS + (AF.SALE_COLS if sales else [])
+    print(blank_rates(p, new).to_string(), flush=True)
+    variants = {"none": []} | {k: v for k, v in GROUPS.items()} | {"all_geo": all_geo, "crime": ["crime_rate"], "market": AF.MARKET_COLS}
+    if sales:
+        variants |= {"sales": AF.SALE_COLS, "geo_sales": all_geo + AF.SALE_COLS}
+    results, preds = [], {}
+    for name, extra in variants.items():
+        r, preds[name] = run(f"{history or 'file'}_{name}", p, cols + extra, ft)
+        results.append(r)
+        show(results[-1:])
+    show(results)
+    idx = preds["none"].index
+    rent, m = p.rent.reindex(idx), ft.reindex(idx).to_numpy()
+    for name in variants:
+        if name != "none":
+            print(name, "overall", paired(rent, preds["none"], preds[name]), "first-time", paired(rent, preds["none"], preds[name], m), flush=True)
+    (OUT / f"features_{history or 'file'}_{'sales' if sales else 'nosales'}.json").write_text(json.dumps(results, indent=1))
+
+
+def geo_test() -> None:
+    feature_test()
+
+
+def sales_test() -> None:
+    feature_test(sales=True)
+
+
 if __name__ == "__main__":
     globals()[sys.argv[1]]()
