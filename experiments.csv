@@ -115,3 +115,4 @@ fabecae0,2026-11-07T02:14:01+00:00,Method lane: s3_reg_lr02_r800 (B within100 0.
 d9a4ac8b,2026-11-07T02:18:01+00:00,Method lane: f_r800 (B within100 0.8148; inner mean MAE 43.81 within100 0.7905),FEATURE_COLS,lgbm_l1:log_ratio:origins=12:rounds=800:seeds=5:{},nan,nan,nan,43.02,nan
 3bb6a17f,2026-11-07T02:18:17+00:00,Method lane: s5_lgbm_cb_half (B within100 0.8153; inner mean MAE 43.82 within100 0.7915),FEATURE_COLS,blend:lgbm_5seed+catboost_2seed,nan,nan,nan,42.79,nan
 b63ea50a,2026-11-07T02:18:17+00:00,Method lane: f_route_first_direct (B within100 0.8148; inner mean MAE 43.75 within100 0.7922),FEATURE_COLS,lgbm_l1:route:first_time=direct:else=log_ratio:seeds=5,nan,nan,nan,42.1,nan
+97d848e1,2026-11-07T02:40:57+00:00,"Manual try: {'drop': [], 'leaves': 63, 'rounds': 400, 'seeds': 5, 'method': 'log_ratio'}",FEATURE_COLS:36 cols,lgbm_l1:log_ratio:origins=12,nan,nan,nan,40.37,nan
