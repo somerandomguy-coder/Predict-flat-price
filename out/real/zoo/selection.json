@@ -1,0 +1,20 @@
+{
+ "greedy_all": {
+  "lgb_n18__v2": 0.24,
+  "lgb_n6__v2": 0.16,
+  "lgb_split__v2": 0.16,
+  "cat_n18__v2": 0.12,
+  "lgb_l1__v2": 0.08,
+  "cat_bldg__v2": 0.08,
+  "qdecode__raw": 0.08,
+  "qdecode__v2": 0.04,
+  "knn__raw": 0.04
+ },
+ "top5": [
+  "lgb_l1__v2",
+  "lgb_n18__v2",
+  "lgb_split__v2",
+  "cat_bldg__v2",
+  "lgb_n6__v2"
+ ]
+}

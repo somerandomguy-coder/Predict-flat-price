@@ -1,0 +1,9 @@
+control B raw {'n': 2182, 'mae': 42.314, 'within100': 0.814, 'r2': 0.878, 'bias': 6.488} | $10 {'mae': 40.0, 'within100': 0.825, 'r2': 0.878}
+control A raw {'n': 2635, 'mae': 40.274, 'within100': 0.805, 'r2': 0.899, 'bias': 3.076} | $10 {'mae': 40.0, 'within100': 0.815, 'r2': 0.899}
+blend B raw {'n': 2182, 'mae': 39.868, 'within100': 0.83, 'r2': 0.884, 'bias': 3.733} | $10 {'mae': 40.0, 'within100': 0.842, 'r2': 0.884}
+blend A raw {'n': 2635, 'mae': 38.025, 'within100': 0.812, 'r2': 0.902, 'bias': 3.61} | $10 {'mae': 40.0, 'within100': 0.825, 'r2': 0.902}
+logged 8673ac9d
+logged 69d195ed
+........ssssssssssss......................................ssssssssssssss [ 63%]
+s...........sssssssss.....................                               [100%]
+78 passed, 36 skipped in 5.16s

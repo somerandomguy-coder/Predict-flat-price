@@ -1,0 +1,47 @@
+         member  med_pre   w100  clip     B  r10_pre  r10_B
+    lgb_l1__raw    41.03 0.8064 51.86 40.43     40.0   40.0
+ lgb_split__raw    41.10 0.8066 51.99 41.06     40.0   40.0
+  cat_bldg__raw    41.70 0.8061 52.20 40.15     40.0   40.0
+ lgb_huber__raw    41.60 0.8074 52.22 41.22     40.0   40.0
+   cat_mae__raw    41.59 0.8046 52.30 40.41     40.0   40.0
+    xgb_ph__raw    41.80 0.8051 52.52 42.38     40.0   40.0
+        et__raw    41.54 0.8044 52.54 43.02     40.0   40.0
+   lgb_dir__raw    41.87 0.8025 52.65 40.22     40.0   40.0
+   lgb_l1__base    43.01 0.7999 53.18 42.31     40.0   40.0
+  cat_mae__base    42.89 0.7996 53.34 42.06     40.0   40.0
+   qdecode__raw    40.00 0.7956 53.34 40.00     40.0   40.0
+ cat_bldg__base    43.15 0.8004 53.40 41.30     40.0   40.0
+lgb_split__base    43.14 0.7993 53.48 43.34     40.0   40.0
+lgb_huber__base    43.92 0.7989 53.54 43.10     40.0   40.0
+  lgb_dir__base    43.10 0.7971 53.65 43.04     40.0   40.0
+   xgb_ph__base    43.94 0.7977 53.82 45.04     40.0   45.0
+       et__base    43.72 0.7953 54.16 45.49     40.0   45.0
+       knn__raw    44.00 0.7879 54.44 44.78     40.0   45.0
+      knn__base    45.32 0.7813 55.22 44.63     45.0   45.0
+  qdecode__base    45.00 0.7820 55.29 45.00     45.0   45.0
+     qreg__base    48.73 0.7719 57.28 45.92     50.0   50.0
+      qreg__raw    49.19 0.7721 57.38 46.15     50.0   50.0
+
+error correlation, top 8
+                 lgb_l1__raw  lgb_split__raw  cat_bldg__raw  lgb_huber__raw  cat_mae__raw  xgb_ph__raw  et__raw  lgb_dir__raw
+lgb_l1__raw            1.00            0.98           0.97            0.98          0.97         0.95     0.94          0.96
+lgb_split__raw         0.98            1.00           0.96            0.97          0.96         0.94     0.94          0.96
+cat_bldg__raw          0.97            0.96           1.00            0.96          0.98         0.94     0.93          0.95
+lgb_huber__raw         0.98            0.97           0.96            1.00          0.96         0.97     0.94          0.97
+cat_mae__raw           0.97            0.96           0.98            0.96          1.00         0.95     0.93          0.95
+xgb_ph__raw            0.95            0.94           0.94            0.97          0.95         1.00     0.92          0.94
+et__raw                0.94            0.94           0.93            0.94          0.93         0.92     1.00          0.93
+lgb_dir__raw           0.96            0.96           0.95            0.97          0.95         0.94     0.93          1.00
+forward w4 greedy {'cat_bldg__raw': 0.2, 'qdecode__raw': 0.2, 'et__raw': 0.12, 'lgb_split__raw': 0.12, 'lgb_l1__raw': 0.08, 'lgb_huber__raw': 0.08, 'cat_mae__raw': 0.08, 'xgb_ph__raw': 0.08, 'knn__raw': 0.04}
+forward w3 greedy {'cat_bldg__raw': 0.24, 'xgb_ph__raw': 0.2, 'lgb_l1__raw': 0.16, 'qdecode__raw': 0.12, 'et__raw': 0.08, 'lgb_split__raw': 0.08, 'knn__raw': 0.04, 'cat_mae__raw': 0.04, 'lgb_dir__raw': 0.04}
+forward w2 greedy {'cat_bldg__raw': 0.24, 'qdecode__raw': 0.16, 'xgb_ph__raw': 0.16, 'et__raw': 0.12, 'lgb_split__raw': 0.12, 'lgb_l1__raw': 0.08, 'knn__raw': 0.08, 'cat_mae__raw': 0.04}
+forward w1 greedy {'cat_bldg__raw': 0.16, 'et__raw': 0.16, 'qdecode__raw': 0.16, 'lgb_split__raw': 0.16, 'lgb_l1__raw': 0.12, 'xgb_ph__raw': 0.12, 'knn__raw': 0.08, 'cat_mae__raw': 0.04}
+forward B greedy {'et__raw': 0.2, 'cat_bldg__raw': 0.16, 'qdecode__raw': 0.16, 'lgb_split__raw': 0.16, 'lgb_l1__raw': 0.12, 'xgb_ph__raw': 0.12, 'knn__raw': 0.08}
+
+forward windows ['w4', 'w3', 'w2', 'w1', 'B'] n 10864
+control    raw 43.20 clip 53.44 w100 0.7979 diff vs control +0.00 [+0.00,+0.00] | $10 40 | per window raw [41.8, 43.4, 43.7, 44.6, 42.3] $10 [40.0, 40.0, 40.0, 45.0, 40.0]
+mean_raw   raw 40.92 clip 52.01 w100 0.8067 diff vs control -2.28 [-2.90,-1.63] | $10 40 | per window raw [39.7, 40.7, 40.7, 43.2, 40.4] $10 [40.0, 40.0, 40.0, 40.0, 40.0]
+mean_top5  raw 41.10 clip 51.96 w100 0.8037 diff vs control -2.11 [-2.70,-1.54] | $10 40 | per window raw [40.2, 40.5, 41.1, 43.9, 40.1] $10 [40.0, 40.0, 40.0, 40.0, 40.0]
+greedy     raw 40.66 clip 51.80 w100 0.8063 diff vs control -2.54 [-3.25,-1.96] | $10 40 | per window raw [39.4, 39.9, 40.4, 43.0, 40.4] $10 [40.0, 40.0, 40.0, 40.0, 40.0]
+
+final greedy weights on all dev windows {'cat_bldg__raw': 0.2, 'lgb_l1__raw': 0.16, 'et__raw': 0.16, 'qdecode__raw': 0.16, 'lgb_split__raw': 0.12, 'xgb_ph__raw': 0.12, 'knn__raw': 0.08}

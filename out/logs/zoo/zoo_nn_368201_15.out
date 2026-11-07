@@ -1,0 +1,10 @@
+/project/hnguyen2/mvu9/conda_envs/rent_zoo/lib/python3.11/site-packages/torch/cuda/__init__.py:734: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+/project/hnguyen2/mvu9/conda_envs/rent_zoo/lib/python3.11/site-packages/pytabkit/models/sklearn/sklearn_base.py:283: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /pytorch/torch/csrc/utils/tensor_numpy.cpp:203.)
+  y_ds = DictDataset(tensors={'y': torch.as_tensor(y_tfmd, dtype=torch.float32)},
+/project/hnguyen2/mvu9/conda_envs/rent_zoo/lib/python3.11/site-packages/torch/cuda/__init__.py:734: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+/project/hnguyen2/mvu9/conda_envs/rent_zoo/lib/python3.11/site-packages/torch/cuda/__init__.py:734: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+/var/spool/slurm/slurmd/job368216/slurm_script: line 12: 1213066 Killed                  /project/hnguyen2/mvu9/conda_envs/rent_zoo/bin/python local/zoo/member.py $LINE
+[2026-11-06T20:43:21.080] error: Detected 1 oom_kill event in StepId=368216.batch. Some of the step tasks have been OOM Killed.

@@ -1,0 +1,13 @@
+{
+ "method": "greedy",
+ "weights": {
+  "cat_bldg__raw": 0.2,
+  "lgb_l1__raw": 0.16,
+  "et__raw": 0.16,
+  "qdecode__raw": 0.16,
+  "lgb_split__raw": 0.12,
+  "xgb_ph__raw": 0.12,
+  "knn__raw": 0.08
+ },
+ "premium_source": "within_building"
+}

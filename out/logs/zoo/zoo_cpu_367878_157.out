@@ -1,0 +1,3 @@
+/project/hnguyen2/mvu9/folder_05_khangcute/Predict-flat-price/local/zoo/member.py:105: IterationLimitWarning: Maximum number of iterations (400) reached.
+  res = sm.QuantReg(Y(tr), sm.add_constant(X, has_constant="add")).fit(q=.5, max_iter=400)
+qreg base w3 train 27411 test 2557 11s

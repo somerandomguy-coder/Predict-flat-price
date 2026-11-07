@@ -1,0 +1,14 @@
+incomplete, skipped: lgb_l1__v2
+incomplete, skipped: lgb_split__v2
+     method    segment    n   mae  d_mae  median_gap
+      model        all 2182 40.38   0.00       15.90
+      model    parking 1158 44.74   0.00       11.36
+      model no_parking 1024 35.90   0.00       22.96
+      model    flipped   85 57.00   0.00       20.70
+premium_mid        all 2182 42.08   1.69       35.98
+premium_mid    parking 1158 46.69   1.94       36.68
+premium_mid no_parking 1024 37.37   1.48       35.59
+premium_mid    flipped   85 54.96  -2.04       35.59
+premium source: within_building | default: two-pass margin on Fold B flipped adverts was $-2.04, under $5
+rows 65777 gap median 40.0 mean 38.6 zero gap 0.139 median without 880.0
+wrote /project/hnguyen2/mvu9/folder_05_khangcute/Predict-flat-price/rents_2-bulbs-1-source.csv

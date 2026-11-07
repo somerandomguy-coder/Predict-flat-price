@@ -1,0 +1,9 @@
+tabm v2 w6
+tabm v2 w5
+tabm v2 w4
+tabm v2 w3
+tabm v2 w2
+tabm v2 w1
+tabm v2 B
+tabm v2 A
+tabm v2 F
