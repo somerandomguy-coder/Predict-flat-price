@@ -1,6 +1,6 @@
 # 45-second pitch
 
-Fill the numbers with `python -m src.report --pitch`, which writes `PITCH_SCRIPT.filled.md`. It refuses mock data.
+Fill the numbers with `python -m src.report --pitch`, which writes `PITCH_SCRIPT.filled.md`.
 
 ## Script
 

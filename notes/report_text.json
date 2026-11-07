@@ -23,7 +23,7 @@
  "journey": [
   {
    "step": "Local median",
-   "change": "Median rent for the same suburb, bedrooms and parking over the last 12 months.",
+   "change": "Median rent for the same suburb, bedrooms and parking over the last 12 months. The tidy $100 is real: most adverts and medians sit on round numbers, so 190 of 2,635 errors are exactly $100, and the median lands on one of them.",
    "foldA": 100.0,
    "within100": 0.5633,
    "foldB": 95.0
