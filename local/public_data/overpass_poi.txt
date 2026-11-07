@@ -1,0 +1,14 @@
+[out:json][timeout:200][date:"2026-07-31T12:00:00Z"][bbox:-33.97,151.11,-33.81,151.29];
+(
+ nwr["railway"="station"];
+ nwr["railway"="halt"];
+ nwr["railway"="tram_stop"];
+ nwr["amenity"="ferry_terminal"];
+ nwr["highway"="bus_stop"];
+ way["highway"~"^(motorway|trunk)$"];
+ way["railway"="rail"];
+ nwr["leisure"="park"];
+ nwr["shop"="supermarket"];
+ way["natural"="coastline"];
+);
+out tags center;

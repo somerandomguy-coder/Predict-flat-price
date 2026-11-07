@@ -17,6 +17,7 @@ from src import external as E  # noqa: E402
 from src import models as M  # noqa: E402
 from src.features import FEATURE_COLS  # noqa: E402
 
+THREADS = 2  # the shared machine ran out of memory at 4 threads with other lanes running
 G = E.GROUPS
 ALL = [c for cols in G.values() for c in cols]
 RUNS = {
@@ -25,8 +26,10 @@ RUNS = {
     "+gnaf_site": G["gnaf_site"],
     "+gnaf_floor": G["gnaf_floor"],
     "+gnaf_created": G["gnaf_created"],
+    "+floor_est": G["floor_est"],
     "+osm": G["osm"],
     "+cadastre": G["cadastre"],
+    "+devmon": G["devmon"],
     "+census": G["census"],
     "+poi": G["poi"],
     "+strata+osm": G["gnaf_strata"] + G["osm"],
@@ -44,7 +47,7 @@ def run(panel: pd.DataFrame, extra: list[str], seeds: int) -> dict:
     with tempfile.TemporaryDirectory() as tmp:
         for s in range(seeds):
             cfg = dict(name=f"pd_{s}", frame=panel, feature_cols=cols, methods=["log_ratio"], seed=100 + s, log=False,
-                       out_path=Path(tmp) / "r.json")
+                       lgb_params=dict(num_threads=THREADS), out_path=Path(tmp) / "r.json")
             res = M.run_experiment(cfg)
             assert not res["fold_a_reported"] and "A" not in res["folds"]
             model = M.fit_model(train, res["features"], "log_ratio", cfg)
@@ -58,14 +61,15 @@ def run(panel: pd.DataFrame, extra: list[str], seeds: int) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("panel")
-    ap.add_argument("--seeds", type=int, default=5)
+    ap.add_argument("--seeds", type=int, default=3)
+    ap.add_argument("--vintage", default=E.GNAF_VINTAGE)
     ap.add_argument("--final")
     ap.add_argument("--only", nargs="*")
     a = ap.parse_args()
     raw = pd.read_parquet(a.panel)
-    panel = E.attach(raw)
+    panel = E.attach(raw, vintage=a.vintage)
     panel.attrs["feature_cols"] = FEATURE_COLS
-    print(f"panel {panel.shape}; Fold A rows are present in the frame but never scored")
+    print(f"panel {panel.shape}; G-NAF {a.vintage}; {a.seeds} seeds; Fold A rows are present in the frame but never scored")
     out = {}
     for name, extra in RUNS.items():
         if a.only and name not in a.only:
@@ -75,14 +79,15 @@ def main() -> None:
         print(f"{name:16s} cols {r['n_cols']:3d}  FoldB {r['mae']:6.2f} sd {r['sd']:.2f}  w100 {r['within100']:.3f}  bias {r['bias']:+.2f}  "
               f"first-time {r['first_time']:6.2f} (n={r['n_first']})  repeat {r['repeat']:6.2f}", flush=True)
     C.OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (C.OUT_DIR / "public_data_foldB.json").write_text(json.dumps(out, indent=1))
+    (C.OUT_DIR / f"public_data_foldB_{a.vintage}.json").write_text(json.dumps(out, indent=1))
 
     if a.final:
-        fin = E.attach(pd.read_parquet(a.final), cutoff=C.AS_OF)
+        fin = E.attach(pd.read_parquet(a.final), cutoff=C.AS_OF, vintage=a.vintage)
         cols = [c for c in ALL if c in panel.columns and c in fin.columns]
         print(E.blank_rates(M.fold_rows(panel, "B"), fin, cols).to_string())
         tr = M.train_rows(panel, C.FOLDS["B"]["cutoff"], M.N_ORIGINS)
         print("train rows blank, for comparison:\n", tr[cols].isna().mean().round(4).to_string())
+    print("RUN COMPLETE", flush=True)  # a log without this line is a killed run, not a result
 
 
 if __name__ == "__main__":

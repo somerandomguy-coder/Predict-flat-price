@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 from . import config as C
-from .load import load_input, norm_addr
+from .load import load_input
 
 EXT = C.DATA_DIR / "external"
 DERIVED = EXT / "derived"
@@ -25,8 +25,10 @@ GROUPS = {
     "gnaf_strata": ["g_sp_number", "g_lot", "g_plan_lots", "g_lot_rank", "g_is_strata"],
     "gnaf_site": ["g_site_addresses", "g_flat_num"],
     "gnaf_created": ["g_created_year"],
+    "floor_est": ["floor_est"],
     "osm": ["osm_levels", "osm_height", "osm_footprint_m2", "osm_gfa_per_flat", "osm_is_residential"],
     "cadastre": ["cad_site_m2", "cad_site_m2_per_flat"],
+    "devmon": ["dm_m2_per_dwelling", "dm_park_per_dwelling", "dm_levels", "dm_dwellings", "dm_completed_year"],
     "census": ["c_median_rent", "c_median_hh_income", "c_median_age", "c_hh_size", "c_flat_share", "c_rented_share",
                "c_high_rise_share", "mb_dwellings_2021", "mb_people_2021"],
     "poi": ["d_station_m", "d_light_rail_m", "d_ferry_m", "d_supermarket_m", "d_park_m", "d_motorway_m", "d_rail_line_m",
@@ -173,6 +175,45 @@ def build_cadastre() -> pd.DataFrame:
     return out
 
 
+# ---- City of Sydney Development Monitoring ------------------------------------------------------------------------
+
+def build_devmon() -> pd.DataFrame:
+    """Floor area, parking and levels from the City's major developments, one record per building_key.
+
+    The extract is dated 30 June 2026. Forecast completions (later than AS_OF) are dropped here, and attach() hides
+    any completion later than the row's cutoff.
+    """
+    import shapely
+    from pyproj import Transformer
+
+    tf = Transformer.from_crs(4326, 7856, always_xy=True)
+    feats = json.load(open(EXT / "cos_devmon" / "devmon.geojson", encoding="utf-8"))["features"]
+    p = pd.DataFrame([f["properties"] for f in feats])
+    p["geom"] = [shapely.transform(shapely.geometry.shape(f["geometry"]), lambda a: np.column_stack(tf.transform(a[:, 0], a[:, 1])))
+                 if f["geometry"] else None for f in feats]
+    print("extract dates", pd.to_datetime(p.DateExtracted, unit="ms").agg(["min", "max"]).tolist())
+    p["completion"] = pd.to_datetime(p.Completion, unit="ms", errors="coerce")
+    p = p[p.geom.notna() & (p.Priv_Dwgs > 0) & (p.ResArea > 0) & p.Status_1.eq("Completed") & (p.completion <= C.AS_OF)].reset_index(drop=True)
+    print("usable records", len(p), p.DevelopmentType.value_counts().to_dict())
+
+    f = load_input()[["building_key", "latitude", "longitude"]].dropna().reset_index(drop=True)
+    x, y = tf.transform(f.longitude.to_numpy(), f.latitude.to_numpy())
+    tree = shapely.STRtree(shapely.make_valid(p.geom.to_numpy()))
+    idx, dist = tree.query_nearest(shapely.points(x, y), max_distance=10, return_distance=True, all_matches=True)
+    m = pd.DataFrame({"building_key": f.building_key.to_numpy()[idx[0]].astype(str), "rec": idx[1]})
+    m = m.merge(p.assign(rec=p.index)[["rec", "DevelopmentType", "Priv_Dwgs", "completion"]], on="rec")
+    m["new"] = m.DevelopmentType.eq("New Building")
+    n = m.groupby(["building_key", "rec", "new", "Priv_Dwgs", "completion"], as_index=False).size()
+    # Most flats under one record wins, and a new building beats an addition.
+    n = n.sort_values(["building_key", "new", "size", "Priv_Dwgs"], ascending=[True, False, False, False]).drop_duplicates("building_key")
+    r = p.iloc[n.rec.to_numpy()].reset_index(drop=True)
+    out = pd.DataFrame({"building_key": n.building_key.to_numpy(), "dm_m2_per_dwelling": (r.ResArea / r.Priv_Dwgs).to_numpy(),
+                        "dm_park_per_dwelling": (r.CarParking / r.Priv_Dwgs).to_numpy(), "dm_levels": r.LevelsAbove.to_numpy(),
+                        "dm_dwellings": r.Priv_Dwgs.to_numpy(), "dm_completion": r.completion.to_numpy()})
+    out.to_parquet(DERIVED / "t_devmon.parquet")
+    return out
+
+
 # ---- OSM transport and amenities ---------------------------------------------------------------------------------
 
 def build_poi() -> pd.DataFrame:
@@ -294,6 +335,21 @@ def attach(df: pd.DataFrame, cutoff=None, vintage: str = GNAF_VINTAGE) -> pd.Dat
         for col in o.columns:
             out[col] = bk.map(o[col]).to_numpy()
 
+    d = _read("t_devmon.parquet")
+    if d is not None:
+        d = d.assign(building_key=d.building_key.astype("object")).set_index("building_key")
+        bk = out.building_key.astype("object")
+        done = pd.to_datetime(bk.map(d.dm_completion))
+        known = (done <= when).to_numpy()  # a building finished after the cutoff was not knowable at it
+        for col in ("dm_m2_per_dwelling", "dm_park_per_dwelling", "dm_levels", "dm_dwellings"):
+            out[col] = bk.map(d[col]).where(known).to_numpy()
+        out["dm_completed_year"] = done.dt.year.where(known).astype(float).to_numpy()
+
+    if "osm_levels" in out and "g_lot_rank" in out:
+        # A weak proxy, not a recovered floor: 0.44 correlation with known floors. Known floors win.
+        est = (out.g_lot_rank * out.osm_levels).round()
+        out["floor_est"] = out.floor_filled.fillna(est) if "floor_filled" in out else est
+
     p = _read("t_poi.parquet")
     if p is not None:
         p = p.assign(gnaf_id=p.gnaf_id.astype("object")).set_index("gnaf_id")
@@ -316,6 +372,3 @@ def blank_rates(fold_rows: pd.DataFrame, final_rows: pd.DataFrame, cols: list[st
     t["gap"] = (t.fold_blank - t.final_blank).abs()
     return t.round(4)
 
-
-def norm_building(s: pd.Series) -> pd.Series:
-    return norm_addr(s)
