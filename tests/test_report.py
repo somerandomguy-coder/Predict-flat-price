@@ -77,8 +77,9 @@ def test_section_order_self_contained_and_no_em_dash(env, monkeypatch):
     monkeypatch.setattr(C, "MOCK", True)
     page = R.build(fixture=True).read_text()
     heads = re.findall(r"<h2>(.*?)</h2>", page)
-    assert [h[:2] for h in heads[:5]] == ["1.", "2.", "3.", "4.", "5."]
-    assert heads[5:] == ["Data and sources", "Method", "Held-out results", "What worked", "What didn&#x27;t", "Limitations"]
+    assert heads[0] == "From $100 to now"
+    assert [h[:2] for h in heads[1:6]] == ["1.", "2.", "3.", "4.", "5."]
+    assert heads[6:] == ["Data and sources", "Method", "Held-out results", "What worked", "What didn&#x27;t", "Limitations"]
     assert not re.search(r"<script|<link|<img|<iframe|src=|href=|url\(|https?://", page)
     assert "—" not in page
 
@@ -124,3 +125,14 @@ def test_pitch_refuses_gaps_and_false_wording(env, change):
 def test_pitch_length():
     words = TEMPLATE.read_text().split("## Script")[1].split()
     assert 100 <= len(words) <= 120
+
+
+def test_journey_shows_steps_and_a_step_that_got_worse():
+    steps = [dict(step="A", change="first", foldA=100.0, within100=.5, foldB=95.0), dict(step="B", change="second", foldA=50.0, within100=.7, foldB=60.0),
+             dict(step="C", change="honest", foldA=50.25, within100=.7, foldB=59.0)]
+    page = R.sec_journey({"report_text": {"journey": steps}}, {})
+    assert "1. A" in page and "3. C" in page and "-$50.00" in page and "+$0.25" in page
+
+
+def test_journey_without_steps_is_pending():
+    assert "pending" in R.sec_journey({}, {}).lower()

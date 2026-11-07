@@ -65,7 +65,7 @@ Two different questions. Results are in `out/real/leak_audit.json` and from `loc
 | First-time flats | 556 | $56.20 | 73.9% |
 | Parking flipped since last known | 85 | $53 | |
 
-Figures are from the pre-removal model, so use them as a guide. Anchors older than 5 years also keep a bias near -$54.
+Figures are from the pre-removal model, so use them as a guide. Anchors older than 5 years also keep a bias near -$51.
 
 ## Data gaps
 | Field | Blank | Idea |

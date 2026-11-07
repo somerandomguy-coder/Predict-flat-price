@@ -13,5 +13,49 @@
   "Projecting the rent trend forward. Tuning on Fold B chose to hold the index flat at the cutoff.",
   "Separating the two model targets. Log(rent / anchor) beat rent by about $1 on Fold B, and the winner changed when we removed features, so treat that choice as close to noise.",
   "Getting one clean parking number. Measured within buildings, a space is worth about $40 a week, but the submitted gap is the model's, with a median of $17, because it did better on 85 Fold B adverts whose parking changed. That sample is small, and the gap is compressed because anchors stay fixed between passes."
+ ],
+ "journey": [
+  {
+   "step": "Local median",
+   "change": "Median rent for the same suburb, bedrooms and parking over the last 12 months.",
+   "foldA": 100.0,
+   "within100": 0.5633,
+   "foldB": 95.0
+  },
+  {
+   "step": "Each flat's last rent",
+   "change": "Use the flat's own last advert, or its building's, instead of a local median. Stale, so it ran $50 low.",
+   "foldA": 65.2,
+   "within100": 0.622,
+   "foldB": 79.19
+  },
+  {
+   "step": "Rent index",
+   "change": "Bring that old rent up to date using how repeat leases of the same flats moved.",
+   "foldA": 44.47,
+   "within100": 0.7627,
+   "foldB": 52.45
+  },
+  {
+   "step": "Leak fix",
+   "change": "We found the input was showing us each test advert's own parking and bedrooms, and removed that. The Fold A score got slightly worse, and the result became believable.",
+   "foldA": 44.61,
+   "within100": 0.7632,
+   "foldB": 52.1
+  },
+  {
+   "step": "LightGBM model",
+   "change": "Learn how far to trust each anchor, using rolling two-month training windows.",
+   "foldA": 41.53,
+   "within100": 0.8046,
+   "foldB": 43.12
+  },
+  {
+   "step": "Cleaner inputs",
+   "change": "Drop date fields that looked nothing like the flats we predict, and predict the ratio to the anchor.",
+   "foldA": 40.32,
+   "within100": 0.803,
+   "foldB": 42.62
+  }
  ]
 }

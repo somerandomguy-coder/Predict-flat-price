@@ -1,5 +1,7 @@
 # Predict flat rents
 
+For a plain summary of where the project stands, read [READING.md](READING.md).
+
 We estimate the weekly asking rent for all 65,777 City of Sydney flats, with and without parking, as at 31 July 2026.
 
 ## Who it helps
@@ -17,7 +19,7 @@ We estimate the weekly asking rent for all 65,777 City of Sydney flats, with and
 ## The clever step
 An old rent is a low rent when the market is rising. A naive estimate copies the last rent seen, so it runs low. We take the closest past rent for each flat (its own, then its building, then its block) and move it forward to the target date with a rent index. The model works from that adjusted rent, not the stale one.
 
-Testing copies real use. Each test predicts two months ahead using only what was known at the time, so no flat can see its own advert. We tune on Fold B and report Fold A untouched.
+Testing copies real use. Each test predicts two months ahead using only what was known at the time, so no flat can see its own advert. We tune on Fold B and never tune on Fold A, though it has been run several times and its adverts were used in our leak check.
 
 ## How to run
 

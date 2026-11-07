@@ -48,7 +48,8 @@ INPUTS = {
         {"provenance": {...}, "unit": "$/week",
          "top_features": [{"feature": "column_name", "label": "Plain name", "mean_abs_shap": 1}]}"""),
     "report_text": dict(files=[], owner="team, by hand", shape="""
-        {"provenance": {...}, "surprising_finding": "text", "what_worked": ["text"], "what_didnt": ["text"]}"""),
+        {"provenance": {...}, "surprising_finding": "text", "what_worked": ["text"], "what_didnt": ["text"],
+         "journey": [{"step", "change", "foldA", "within100", "foldB"}]}"""),
 }
 
 # Published figures, quoted as supplied. These are the only result numbers written into this file.
@@ -288,7 +289,7 @@ def split_diagram() -> str:
 
     A, B = C.FOLDS["A"], C.FOLDS["B"]
     rows = [("Fold B: tuning check", B["cutoff"], B["start"], B["end"]),
-            ("Fold A: untouched test", A["cutoff"], A["start"], A["end"]),
+            ("Fold A: held-out test", A["cutoff"], A["start"], A["end"]),
             ("Final: the submission", C.AS_OF, C.SCORE_START, C.SCORE_END)]
     H = 34 + 56 * len(rows)
     s = [f'<svg class="plot" viewBox="0 0 {W} {H}" role="img" aria-label="Date split: each fold learns from the past '
@@ -320,10 +321,35 @@ def tiles(data) -> str:
     f = fold_metrics(method(data.get("metrics"), "final"), "A")
     items = [(money(f["mae"]), "typical miss on held-back adverts, per week"),
              (pct(f["within100"]), "of held-back adverts within $100 a week"),
-             (plain(f["r2"]), "R2 on the untouched test")]
+             (plain(f["r2"]), "R2 on held-out Fold A adverts")]
     cells = "".join(f'<div class="tile{" is-pending" if v == PENDING else ""}"><b>{esc(v)}</b><span>{esc(t)}</span></div>'
                     for v, t in items)
     return f'<div class="tiles">{cells}</div>'
+
+
+def sec_journey(data, problems) -> str:
+    """The path from baseline to now. Steps come from report_text.json, so a new step is one more entry."""
+    raw = dig(data.get("report_text"), "journey")
+    steps = [j for j in raw if isinstance(j, dict) and text_of(j.get("step")) and num(j.get("foldA")) is not None] \
+        if isinstance(raw, list) else []
+    if not steps:
+        return section(None, "From $100 to now", None, pending_note("journey steps. Add journey to " + text_path().name))
+    first, last = num(steps[0]["foldA"]), num(steps[-1]["foldA"])
+    lead = (f"We started with a typical miss of {money(first)} a week and reached {money(last)}. "
+            "Each step is scored on the same held-out date windows, as it stood at the time.")
+    bars = hbars([(f"{i}. {text_of(j['step'])}", [(num(j["foldA"]), "s1", "")]) for i, j in enumerate(steps, 1)])
+    rows, notes, prev = [], [], None
+    for i, j in enumerate(steps, 1):
+        a = num(j["foldA"])
+        delta = "start" if prev is None else f"{'+' if a > prev else '-'}${abs(a - prev):.2f}"
+        rows.append((f"{i}. {text_of(j['step'])}", money(a), delta, pct(num(j.get("within100"))), money(num(j.get("foldB")))))
+        notes.append(f"<li><strong>{esc(text_of(j['step']))}.</strong> {esc(text_of(j.get('change')) or '')}</li>")
+        prev = a
+    body = bars + "<ol>" + "".join(notes) + "</ol>" + table(["Step", "Fold A", "Change", "Within $100", "Fold B"], rows)
+    body += '<p class="note">Median error in $/week. Fold A is June and July 2026 adverts, Fold B is April and May 2026.</p>'
+    body += ('<p class="note">Microburbs reports $86 on the frozen August and September adverts, which are different adverts, '
+             "so it is not on this chart. Differences under about $1 are within noise.</p>")
+    return section(None, "From $100 to now", lead, body)
 
 
 def sec_lag(data, problems) -> str:
@@ -575,7 +601,7 @@ def render(data: dict, problems: dict, mode: str) -> str:
     intro = (f'<h1>Fair weekly rent for every City of Sydney flat</h1><p class="lead">We estimated the weekly asking rent for all '
              f"{C.N_INPUT:,} City of Sydney flats, with and without parking, as at {esc(d(C.AS_OF))}. "
              f"This page shows what we learned first, then how we did it.</p>")
-    parts = [intro, tiles(data), sec_lag(data, problems), sec_parking(data, problems), sec_floor(data, problems),
+    parts = [intro, tiles(data), sec_journey(data, problems), sec_lag(data, problems), sec_parking(data, problems), sec_floor(data, problems),
              sec_error(data, problems), sec_shap(data, problems), sec_sources(data), sec_method(data, problems),
              sec_results(data, problems), sec_list("What worked", data, "what_worked"),
              sec_list("What didn't", data, "what_didnt"), sec_limits()]
