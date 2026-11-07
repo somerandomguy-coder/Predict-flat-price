@@ -70,7 +70,7 @@ Figures are from the pre-removal model, so use them as a guide. Anchors older th
 ## Data gaps
 | Field | Blank | Idea |
 |---|---|---|
-| `floor_level` | 31,381 | Building storeys and unit number patterns |
+| `floor_level` | 31,381 | Unit patterns cannot help: the field is derived from the unit number. Needs another source, such as building storeys |
 | `car_space` | 5,793 | Building neighbours, API profile |
 | Block fields | 4,246 | ABS mesh block counts |
 | `first_ever_listed` | 279 | Low value |
@@ -100,3 +100,8 @@ A probe hit `listings/rent-history` without a date bound and got 200 adverts dat
 - Compare seed-averaged results, and ignore gaps under $1.
 - Check any new feature's blank rate in fold rows against final rows.
 - Never send addresses or rows from the supplied files to outside services.
+
+## Queued from domain research (`notes/domain_research.md`)
+These were measured on earlier windows, not Fold B, and need confirming there after the lanes finish.
+1. Raw last rent features: -$1.66 on windows to March 2026 (95% CI -$2.36 to -$0.93), because many re-lets return at exactly the old rent.
+2. Rounding to where adverts cluster. This exploits how a median behaves and does not move mean error, so test it and describe it plainly if used.
