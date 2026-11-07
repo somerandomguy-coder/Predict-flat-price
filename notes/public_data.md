@@ -111,7 +111,7 @@ Only bounding boxes or whole public layers were requested. No address, `gnaf_id`
 - **NSW Property Sales Information and bulk land values: blocked.** `valuergeneral.nsw.gov.au` and `valuation.property.nsw.gov.au` answer automated requests with a Cloudflare challenge (`cf-mitigated: challenge`). It was not bypassed. No mirror was found in the data.nsw catalogue. This is the best remaining lead for per-flat area, but the file contents were not seen, so whether strata area is populated is unconfirmed. A person could download the files in a browser into `data/external/`. Sales would need masking by each row's cutoff.
 - **NSW bond data: not tried.** Files are listed, June 2026 is the last usable lodgement file, but the page states no licence and the rent index already tracks the market.
 - **TfNSW GTFS: not used.** OSM stops stood in for it. No frequency data, so it measures distance, not service.
-- **City of Sydney 3D model and NSW building footprints: not found** in the catalogue searches. FES 2022 block data was not tried; it is block-level, and its licence field is blank.
+- **City of Sydney 3D model: not found** in a title search of the City's catalogue. **NSW building footprints: not properly searched;** only the first 60 entries of the Spatial Services list were read. FES 2022 block data was not tried; it is block-level, and its licence field is blank.
 - **Cadastre history service:** needs a token, so it was not used.
 
 ## Known limits
