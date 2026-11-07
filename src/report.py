@@ -584,6 +584,15 @@ details{margin-top:8px;font-size:.9rem}summary{cursor:pointer;color:var(--ink2)}
 caption{text-align:left;font-weight:600;padding-bottom:6px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 blockquote{margin:0;padding:8px 12px;border-left:3px solid var(--s1);background:var(--panel)}
 footer{color:var(--ink2);font-size:.85rem;padding:16px 0}
+
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes reveal{from{opacity:.15;transform:translateY(26px)}to{opacity:1;transform:none}}
+.tile{animation:rise .6s ease-out both}.tile:nth-child(2){animation-delay:.15s}.tile:nth-child(3){animation-delay:.3s}
+.bar{transform-origin:left;animation:grow 1.1s cubic-bezier(.2,.7,.2,1) both}.bar.neg{transform-origin:right}
+.barrow:nth-child(2) .bar{animation-delay:.12s}.barrow:nth-child(3) .bar{animation-delay:.24s}.barrow:nth-child(4) .bar{animation-delay:.36s}.barrow:nth-child(5) .bar{animation-delay:.48s}.barrow:nth-child(6) .bar{animation-delay:.6s}.barrow:nth-child(7) .bar{animation-delay:.72s}
+@supports (animation-timeline:view()){section{animation:reveal linear both;animation-timeline:view();animation-range:entry 0% entry 35%}.bar{animation-timeline:view();animation-duration:auto;animation-delay:0s!important;animation-range:entry 10% entry 55%}}
+@media (prefers-reduced-motion:reduce){.tile,.bar,section{animation:none!important}}
 """
 
 BANNERS = {
